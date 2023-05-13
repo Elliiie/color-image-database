@@ -1,7 +1,14 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "constants.cpp"
 #include <iostream>
 #include <cassert>
+#include <QPixmap>
+#include "QtWidgets/qscrollarea.h"
+#include "flowLayout.h"
+#include <QPushButton>
+#include "QtWidgets/qlabel.h"
+#include <QPixmap>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,7 +16,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 //    this->db = DatabaseModule();
-    this->testDb();
+//    this->testDb();
+    loadImages();
+
+    setupButtons();
+
+    setWindowTitle(tr("Images database"));
+
 }
 
 MainWindow::~MainWindow()
@@ -55,4 +68,53 @@ void MainWindow::testDb() {
     for (auto image : imagesFromDb) {
         std::cout << image;
     }
+}
+
+void MainWindow::loadImages() {
+    FlowLayout *flowLayout = new FlowLayout;
+
+    QPixmap pic(".../malo.png");
+
+    for(int i=0; i<20; i++) {
+        QLabel *imageLabel = new QLabel();
+        imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
+
+        flowLayout->addWidget(imageLabel);
+    }
+
+    QWidget *widget = new QWidget();
+    widget->setLayout(flowLayout);
+
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(widget);
+
+    ui->verticalLayout->addWidget(scrollArea);
+}
+
+
+
+void MainWindow::setupButtons() {
+    QHBoxLayout* buttons = new QHBoxLayout();
+
+    QHBoxLayout* colors = new QHBoxLayout();
+
+    for(int i=0; i<10; i++) {
+        QPushButton *button = new QPushButton();
+        button->setFixedSize(UIConstants().COLOR_BUTTON_SIZE);
+        QColor col = QColor(Qt::red);
+        QString qss = QString("background-color: %1").arg(col.name());
+        button->setStyleSheet(qss);
+        colors->addWidget(button);
+    }
+
+    buttons->addItem(colors);
+
+    QPushButton *add = new QPushButton(UIConstants().ADD_BUTTON_TITLE);
+    add->setMaximumSize(UIConstants().ADD_BUTTON_SIZE);
+    buttons->addWidget(add);
+
+    QWidget *widget = new QWidget();
+    widget->setLayout(buttons);
+    ui->verticalLayout->addWidget(widget);
 }

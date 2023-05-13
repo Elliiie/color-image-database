@@ -16,6 +16,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void loadImages();
+    void setupButtons();
+
 private:
     Ui::MainWindow *ui;
     DatabaseModule db;
