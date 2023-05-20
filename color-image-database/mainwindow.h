@@ -2,7 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "databasemodule.h"
+#include "QtCore/qsignalmapper.h"
+#include "fileOperationsManager.h"
+#include "flowLayout.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,12 +18,27 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void loadImages();
-    void setupButtons();
+private slots:
+    void on_open_image_tapped();
+    void on_color_tapped(QString hex);
 
 private:
     Ui::MainWindow *ui;
+    FlowLayout *flowLayout;
+    QHBoxLayout* buttons;
+    QSignalMapper mapper;
+
     DatabaseModule db;
+    FileOperationsManager fileOperationsManager;
+
     void testDb();
+
+    void setupMainLayout();
+    void setupLoadImageButton();
+    void setupColorButtons();
+
+    void showSavedImages();
+    void showImagesWithDominantColor(QString hex);
+    void showImage(std::string name);
 };
 #endif // MAINWINDOW_H

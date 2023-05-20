@@ -29,6 +29,8 @@ set(PROJECT_SOURCES
         flowLayout.h
         flowLayout.cpp
         constants.cpp
+        fileOperationsManager.h
+        fileOperationsManager.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

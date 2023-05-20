@@ -24,6 +24,7 @@ public:
     void setGeometry(const QRect &rect) override;
     QSize sizeHint() const override;
     QLayoutItem *takeAt(int index) override;
+    void clearLayout();
 
 private:
     int doLayout(const QRect &rect, bool testOnly) const;

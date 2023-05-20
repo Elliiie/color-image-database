@@ -161,3 +161,16 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
         return static_cast<QLayout *>(parent)->spacing();
     }
 }
+
+void FlowLayout::clearLayout()
+{
+    if (this->layout() != nullptr)
+    {
+        QLayoutItem* item;
+        while ((item = this->layout()->takeAt(0)) != nullptr)
+        {
+            delete item->widget();
+            delete item;
+        }
+    }
+}

@@ -14,20 +14,74 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-//    this->db = DatabaseModule();
-//    this->testDb();
-    loadImages();
+    this->ui->setupUi(this);
+    this->flowLayout = new FlowLayout();
+    this->buttons = new QHBoxLayout();
 
-    setupButtons();
+    this->db = DatabaseModule();
+    this->fileOperationsManager = FileOperationsManager(db);
+//    this->testDb();
+
+    this->setupMainLayout();
+
+    this->showSavedImages();
 
     setWindowTitle(tr("Images database"));
-
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setupMainLayout()
+{
+    QWidget *flowLayouotWidget = new QWidget();
+    flowLayouotWidget->setLayout(flowLayout);
+
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(flowLayouotWidget);
+
+    ui->verticalLayout->addWidget(scrollArea);
+
+    QWidget *buttonsWidget = new QWidget();
+
+    this->setupColorButtons();
+    this->setupLoadImageButton();
+
+    buttonsWidget->setLayout(buttons);
+    ui->verticalLayout->addWidget(buttonsWidget);
+}
+
+void MainWindow::setupColorButtons()
+{
+    QHBoxLayout* colors = new QHBoxLayout();
+
+    std::vector<Color> savedColors = db.readColors();
+
+    for(Color color: savedColors) {
+        QPushButton *button = new QPushButton();
+        button->setFixedSize(UIConstants().COLOR_BUTTON_SIZE);
+        QString buttonColor = QString("background-color: %1").arg(color.getHex());
+        button->setStyleSheet(buttonColor);
+
+        mapper.setMapping(button, color.getHex());
+        connect(button, SIGNAL(clicked()), &mapper, SLOT(map()));
+
+        colors->addWidget(button);
+    }
+
+    connect(&mapper, SIGNAL(mappedString(QString)), this, SLOT(on_color_tapped(QString)));
+    buttons->addItem(colors);
+}
+
+void MainWindow::setupLoadImageButton()
+{
+    QPushButton *add = new QPushButton(UIConstants().ADD_BUTTON_TITLE);
+    add->setMaximumSize(UIConstants().ADD_BUTTON_SIZE);
+    connect(add, SIGNAL(clicked()), this, SLOT(on_open_image_tapped()));
+    buttons->addWidget(add);
 }
 
 void MainWindow::testDb() {
@@ -70,51 +124,40 @@ void MainWindow::testDb() {
     }
 }
 
-void MainWindow::loadImages() {
-    FlowLayout *flowLayout = new FlowLayout;
-
-    QPixmap pic(".../malo.png");
-
-    for(int i=0; i<20; i++) {
-        QLabel *imageLabel = new QLabel();
-        imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
-
-        flowLayout->addWidget(imageLabel);
+void MainWindow::showSavedImages()
+{
+    for(Image image: fileOperationsManager.loadImages()) {
+        showImage(image.getPath().u8string());
     }
-
-    QWidget *widget = new QWidget();
-    widget->setLayout(flowLayout);
-
-    QScrollArea *scrollArea = new QScrollArea;
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setWidget(widget);
-
-    ui->verticalLayout->addWidget(scrollArea);
 }
 
-
-
-void MainWindow::setupButtons() {
-    QHBoxLayout* buttons = new QHBoxLayout();
-
-    QHBoxLayout* colors = new QHBoxLayout();
-
-    for(int i=0; i<10; i++) {
-        QPushButton *button = new QPushButton();
-        button->setFixedSize(UIConstants().COLOR_BUTTON_SIZE);
-        QColor col = QColor(Qt::red);
-        QString qss = QString("background-color: %1").arg(col.name());
-        button->setStyleSheet(qss);
-        colors->addWidget(button);
+void MainWindow::showImagesWithDominantColor(QString hex)
+{
+    for(Image image: fileOperationsManager.loadImages(hex)) {
+        showImage(image.getPath().u8string());
     }
+}
 
-    buttons->addItem(colors);
+void MainWindow::showImage(std::string name)
+{
+    if(name.empty()) { return; }
 
-    QPushButton *add = new QPushButton(UIConstants().ADD_BUTTON_TITLE);
-    add->setMaximumSize(UIConstants().ADD_BUTTON_SIZE);
-    buttons->addWidget(add);
+    QPixmap pic(QString::fromStdString(name));
+    QLabel *imageLabel = new QLabel();
+    imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
 
-    QWidget *widget = new QWidget();
-    widget->setLayout(buttons);
-    ui->verticalLayout->addWidget(widget);
+    flowLayout->addWidget(imageLabel);
+}
+
+void MainWindow::on_open_image_tapped()
+{
+    QString fileName = this->fileOperationsManager.openFile(this);
+    showImage(fileName.toStdString());
+    fileOperationsManager.saveImage(fileName);
+}
+
+void MainWindow::on_color_tapped(QString hex)
+{
+    flowLayout->clearLayout();
+    showImagesWithDominantColor(hex);
 }
