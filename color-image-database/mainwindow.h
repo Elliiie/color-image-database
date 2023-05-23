@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "databasemodule.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,5 +18,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    DatabaseModule db;
+    void testDb();
 };
 #endif // MAINWINDOW_H
