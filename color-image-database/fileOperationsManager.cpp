@@ -4,12 +4,13 @@
 #include <ctime>
 #include "constants.cpp"
 
+
 FileOperationsManager::FileOperationsManager()
 {
-    this->db = DatabaseModule();
+    this->db = nullptr;
 }
 
-FileOperationsManager::FileOperationsManager(DatabaseModule db)
+FileOperationsManager::FileOperationsManager(DatabaseModule* db)
 {
     this->db = db;
 }
@@ -28,21 +29,18 @@ void FileOperationsManager::saveImage(QString fullName)
 {
     if(fullName.isEmpty()) { return; }
 
-    // We should think of a better way to generate IDs ://
-    ImagesCount++;
-
     // TODO: Run color detection algorithm to determine the dominant one and save the image with it
-    Image image = Image(ImagesCount, fullName.toStdString(), Color());
-    db.createImage(image);
+    Image image = Image(fullName.toStdString(), db->readColors().at(0));
+    db->createImage(image);
 }
 
 std::vector<Image> FileOperationsManager::loadImages()
 {
-    return db.readImages();
+    return db->readImages();
 }
 
 std::vector<Image> FileOperationsManager::loadImages(QString hex)
 {
-    Color color = db.readColor(hex);
-    return db.readImages(color);
+    Color color = db->readColor(hex);
+    return db->readImages(color);
 }

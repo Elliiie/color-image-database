@@ -18,8 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->flowLayout = new FlowLayout();
     this->buttons = new QHBoxLayout();
 
-    this->db = DatabaseModule();
-    this->fileOperationsManager = FileOperationsManager(db);
+    this->fileOperationsManager = FileOperationsManager(&db);
 //    this->testDb();
 
     this->setupMainLayout();
@@ -72,7 +71,7 @@ void MainWindow::setupColorButtons()
         colors->addWidget(button);
     }
 
-    connect(&mapper, SIGNAL(mappedString(QString)), this, SLOT(on_color_tapped(QString)));
+    connect(&mapper, SIGNAL(mappedString(QString)), this, SLOT(on_colorTapped(QString)));
     buttons->addItem(colors);
 }
 
@@ -80,9 +79,49 @@ void MainWindow::setupLoadImageButton()
 {
     QPushButton *add = new QPushButton(UIConstants().ADD_BUTTON_TITLE);
     add->setMaximumSize(UIConstants().ADD_BUTTON_SIZE);
-    connect(add, SIGNAL(clicked()), this, SLOT(on_open_image_tapped()));
+    connect(add, SIGNAL(clicked()), this, SLOT(on_openImageTapped()));
     buttons->addWidget(add);
 }
+
+void MainWindow::showSavedImages()
+{
+    for(Image image: fileOperationsManager.loadImages()) {
+        showImage(image.getPath().u8string());
+    }
+}
+
+void MainWindow::showImagesWithDominantColor(QString hex)
+{
+    for(Image image: fileOperationsManager.loadImages(hex)) {
+        showImage(image.getPath().u8string());
+    }
+}
+
+void MainWindow::showImage(std::string name)
+{
+    if(name.empty()) { return; }
+
+    QPixmap pic(QString::fromStdString(name));
+    QLabel *imageLabel = new QLabel();
+    imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
+
+    flowLayout->addWidget(imageLabel);
+}
+
+void MainWindow::on_openImageTapped()
+{
+    QString fileName = this->fileOperationsManager.openFile(this);
+    showImage(fileName.toStdString());
+    fileOperationsManager.saveImage(fileName);
+}
+
+void MainWindow::on_colorTapped(QString hex)
+{
+    flowLayout->clearLayout();
+    showImagesWithDominantColor(hex);
+}
+
+// ---------------------- DEBUG CODE ------------------------------
 
 void MainWindow::testDb() {
     this->db.wipeDatabase();
@@ -122,42 +161,4 @@ void MainWindow::testDb() {
     for (auto image : imagesFromDb) {
         std::cout << image;
     }
-}
-
-void MainWindow::showSavedImages()
-{
-    for(Image image: fileOperationsManager.loadImages()) {
-        showImage(image.getPath().u8string());
-    }
-}
-
-void MainWindow::showImagesWithDominantColor(QString hex)
-{
-    for(Image image: fileOperationsManager.loadImages(hex)) {
-        showImage(image.getPath().u8string());
-    }
-}
-
-void MainWindow::showImage(std::string name)
-{
-    if(name.empty()) { return; }
-
-    QPixmap pic(QString::fromStdString(name));
-    QLabel *imageLabel = new QLabel();
-    imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
-
-    flowLayout->addWidget(imageLabel);
-}
-
-void MainWindow::on_open_image_tapped()
-{
-    QString fileName = this->fileOperationsManager.openFile(this);
-    showImage(fileName.toStdString());
-    fileOperationsManager.saveImage(fileName);
-}
-
-void MainWindow::on_color_tapped(QString hex)
-{
-    flowLayout->clearLayout();
-    showImagesWithDominantColor(hex);
 }

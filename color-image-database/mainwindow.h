@@ -19,8 +19,8 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_open_image_tapped();
-    void on_color_tapped(QString hex);
+    void on_openImageTapped();
+    void on_colorTapped(QString hex);
 
 private:
     Ui::MainWindow *ui;
