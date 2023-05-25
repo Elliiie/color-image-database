@@ -1,21 +1,127 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "constants.cpp"
 #include <iostream>
 #include <cassert>
+#include <QPixmap>
+#include "QtWidgets/qscrollarea.h"
+#include "flowLayout.h"
+#include <QPushButton>
+#include "QtWidgets/qlabel.h"
+#include <QPixmap>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-//    this->db = DatabaseModule();
-    this->testDb();
+    this->ui->setupUi(this);
+    this->flowLayout = new FlowLayout();
+    this->buttons = new QHBoxLayout();
+
+    this->fileOperationsManager = FileOperationsManager(&db);
+//    this->testDb();
+
+    this->setupMainLayout();
+
+    this->showSavedImages();
+
+    setWindowTitle(tr("Images database"));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::setupMainLayout()
+{
+    QWidget *flowLayouotWidget = new QWidget();
+    flowLayouotWidget->setLayout(flowLayout);
+
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(flowLayouotWidget);
+
+    ui->verticalLayout->addWidget(scrollArea);
+
+    QWidget *buttonsWidget = new QWidget();
+
+    this->setupColorButtons();
+    this->setupLoadImageButton();
+
+    buttonsWidget->setLayout(buttons);
+    ui->verticalLayout->addWidget(buttonsWidget);
+}
+
+void MainWindow::setupColorButtons()
+{
+    QHBoxLayout* colors = new QHBoxLayout();
+
+    std::vector<Color> savedColors = db.readColors();
+
+    for(Color color: savedColors) {
+        QPushButton *button = new QPushButton();
+        button->setFixedSize(UIConstants().COLOR_BUTTON_SIZE);
+        QString buttonColor = QString("background-color: %1").arg(color.getHex());
+        button->setStyleSheet(buttonColor);
+
+        mapper.setMapping(button, color.getHex());
+        connect(button, SIGNAL(clicked()), &mapper, SLOT(map()));
+
+        colors->addWidget(button);
+    }
+
+    connect(&mapper, SIGNAL(mappedString(QString)), this, SLOT(on_colorTapped(QString)));
+    buttons->addItem(colors);
+}
+
+void MainWindow::setupLoadImageButton()
+{
+    QPushButton *add = new QPushButton(UIConstants().ADD_BUTTON_TITLE);
+    add->setMaximumSize(UIConstants().ADD_BUTTON_SIZE);
+    connect(add, SIGNAL(clicked()), this, SLOT(on_openImageTapped()));
+    buttons->addWidget(add);
+}
+
+void MainWindow::showSavedImages()
+{
+    for(Image image: fileOperationsManager.loadImages()) {
+        showImage(image.getPath().u8string());
+    }
+}
+
+void MainWindow::showImagesWithDominantColor(QString hex)
+{
+    for(Image image: fileOperationsManager.loadImages(hex)) {
+        showImage(image.getPath().u8string());
+    }
+}
+
+void MainWindow::showImage(std::string name)
+{
+    if(name.empty()) { return; }
+
+    QPixmap pic(QString::fromStdString(name));
+    QLabel *imageLabel = new QLabel();
+    imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
+
+    flowLayout->addWidget(imageLabel);
+}
+
+void MainWindow::on_openImageTapped()
+{
+    QString fileName = this->fileOperationsManager.openFile(this);
+    showImage(fileName.toStdString());
+    fileOperationsManager.saveImage(fileName);
+}
+
+void MainWindow::on_colorTapped(QString hex)
+{
+    flowLayout->clearLayout();
+    showImagesWithDominantColor(hex);
+}
+
+// ---------------------- DEBUG CODE ------------------------------
 
 void MainWindow::testDb() {
     this->db.wipeDatabase();

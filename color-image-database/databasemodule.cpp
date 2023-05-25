@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 
-const QString COLORS[3] = {"fcba03", "000000", "ffffff"};
+const QString COLORS[3] = {"#fcba03", "#000000", "#ffffff"};
 
 DatabaseModule::DatabaseModule() {
     this->db = QSqlDatabase::addDatabase("QPSQL", "colors");
@@ -41,8 +41,9 @@ void DatabaseModule::wipeDatabase() {
 }
 
 void DatabaseModule::initialSetup() {
+    qDebug() << "Setting up database connection...";
     QSqlQuery qry(this->db);
-    if(!qry.exec(QString("CREATE TABLE IF NOT EXISTS colors (color_id SERIAL NOT NULL PRIMARY KEY, hex CHAR(6) NOT NULL) ")))
+    if(!qry.exec(QString("CREATE TABLE IF NOT EXISTS colors (color_id SERIAL NOT NULL PRIMARY KEY, hex CHAR(7) NOT NULL) ")))
         qDebug() << qry.lastError();
     else
         qDebug() << "colors table created or already exists!";
@@ -52,12 +53,17 @@ void DatabaseModule::initialSetup() {
     else
         qDebug() << "images table created or already exists!";
 
-    for (QString color : COLORS) {
-        qry.prepare("INSERT INTO colors (hex) VALUES (:hex)");
-        qry.bindValue(":hex", color);
-        if (!qry.exec())
-               qDebug() << qry.lastError();
+    // Insert default colors if they do not exist
+    bool colorsTableIsEmpty = this->readColors().empty();
+    if (colorsTableIsEmpty) {
+        for (QString color : COLORS) {
+            qry.prepare("INSERT INTO colors (hex) VALUES (:hex)");
+            qry.bindValue(":hex", color);
+            if (!qry.exec())
+                   qDebug() << qry.lastError();
+        }
     }
+
 }
 
 void DatabaseModule::createImage(Image image) {
