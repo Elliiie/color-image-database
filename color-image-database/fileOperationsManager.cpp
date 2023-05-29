@@ -3,6 +3,7 @@
 #include <iostream>
 #include <ctime>
 #include "constants.cpp"
+#include "imageutil.h"
 
 
 FileOperationsManager::FileOperationsManager()
@@ -29,8 +30,11 @@ void FileOperationsManager::saveImage(QString fullName)
 {
     if(fullName.isEmpty()) { return; }
 
-    // TODO: Run color detection algorithm to determine the dominant one and save the image with it
-    Image image = Image(fullName.toStdString(), db->readColors().at(0));
+    std::vector<Color> colors = db->readColors();
+    Color dominantColor = ImageUtil::dominantColorFrom(fullName, colors);
+
+    int id = db->readImages().size() + 1;
+    Image image = Image(id, fullName.toStdString(), dominantColor);
     db->createImage(image);
 }
 

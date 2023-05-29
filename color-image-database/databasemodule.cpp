@@ -6,7 +6,9 @@
 #include <iostream>
 #include <string>
 
-const QString COLORS[3] = {"#fcba03", "#000000", "#ffffff"};
+const QString COLORS[16] = {"#fcba03", "#000000", "#13fc03", "#0800fa",
+                           "#ee00fa", "#fa0008", "#fa8a00", "#5905f5", "#f50551",
+                           "#775e52"};
 
 DatabaseModule::DatabaseModule() {
     this->db = QSqlDatabase::addDatabase("QPSQL", "colors");
