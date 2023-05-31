@@ -20,13 +20,15 @@ public:
 
 private slots:
     void on_openImageTapped();
+    void on_deleteImageTapped(int id);
     void on_colorTapped(QString hex);
 
 private:
     Ui::MainWindow *ui;
     FlowLayout *flowLayout;
     QHBoxLayout* buttons;
-    QSignalMapper mapper;
+    QSignalMapper colorsMapper;
+    QSignalMapper imagesActionMapper;
 
     DatabaseModule db;
     FileOperationsManager fileOperationsManager;
@@ -39,6 +41,6 @@ private:
 
     void showSavedImages();
     void showImagesWithDominantColor(QString hex);
-    void showImage(std::string name);
+    void showImage(Image image);
 };
 #endif // MAINWINDOW_H

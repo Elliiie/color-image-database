@@ -13,4 +13,6 @@ struct UIConstants
     const QString COLORS[16] = {"#ff0000", "#ff5500", "#ffaa00", "#ffff00", "#aaff00", "#55ff00",
                                "#00ffaa", "#00ffff", "#00aaff", "#0055ff", "#0000ff", "#5500ff",
                                "#aa00ff", "#ff00ff", "#ff00aa", "#ff0055"};
+
+    const QString DELETE_BUTTON_TITLE = "Delete";
 };
