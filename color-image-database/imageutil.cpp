@@ -3,7 +3,7 @@
 
 QColor ImageUtil::dominantColor(const QImage& image)
 {
-    std::vector<int> histogram(361);
+    std::vector<int> histogram(360);
 
     // Loop through the rows and count hue values.
     for (int y = 0; y < image.height(); ++y) {
@@ -33,7 +33,7 @@ Color ImageUtil::dominantColorFrom(QString imagePath, std::vector<Color> colors)
     int closestHue = 360;
 
     for(Color const& color : colors) {
-        QColor currentColor = ColorConverter::hexToColor(color);
+        QColor currentColor = ColorConverter::hexToColor(color).toHsv();
 
         int hueDifference = abs(dominantColor.hue() - currentColor.hue());
         if (hueDifference < closestHue) {
