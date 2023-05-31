@@ -9,4 +9,6 @@ struct UIConstants
     const QSize ADD_BUTTON_SIZE = QSize(200, 30);
 
     const QString ADD_BUTTON_TITLE = "Load new image";
+
+    const QString DELETE_BUTTON_TITLE = "Delete";
 };

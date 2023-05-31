@@ -65,13 +65,13 @@ void MainWindow::setupColorButtons()
         QString buttonColor = QString("background-color: %1").arg(color.getHex());
         button->setStyleSheet(buttonColor);
 
-        mapper.setMapping(button, color.getHex());
-        connect(button, SIGNAL(clicked()), &mapper, SLOT(map()));
+        colorsMapper.setMapping(button, color.getHex());
+        connect(button, SIGNAL(clicked()), &colorsMapper, SLOT(map()));
 
         colors->addWidget(button);
     }
 
-    connect(&mapper, SIGNAL(mappedString(QString)), this, SLOT(on_colorTapped(QString)));
+    connect(&colorsMapper, SIGNAL(mappedString(QString)), this, SLOT(on_colorTapped(QString)));
     buttons->addItem(colors);
 }
 
@@ -85,34 +85,59 @@ void MainWindow::setupLoadImageButton()
 
 void MainWindow::showSavedImages()
 {
-    for(Image image: fileOperationsManager.loadImages()) {
-        showImage(image.getPath().u8string());
+    for(Image image: db.readImages()) {
+        showImage(image);
     }
 }
 
 void MainWindow::showImagesWithDominantColor(QString hex)
 {
-    for(Image image: fileOperationsManager.loadImages(hex)) {
-        showImage(image.getPath().u8string());
+     Color color = db.readColor(hex);
+    for(Image image: db.readImages(color)) {
+        showImage(image);
     }
 }
 
-void MainWindow::showImage(std::string name)
+void MainWindow::showImage(Image image)
 {
-    if(name.empty()) { return; }
+    std::string path = image.getPath();
+    if(path.empty()) { return; }
 
-    QPixmap pic(QString::fromStdString(name));
+    QWidget* deleteButtonWidget = new QWidget();
+
+    QVBoxLayout* layout = new QVBoxLayout(deleteButtonWidget);
+    deleteButtonWidget->setLayout(layout);
+
+    QPixmap pic(QString::fromStdString(path));
     QLabel *imageLabel = new QLabel();
     imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
 
-    flowLayout->addWidget(imageLabel);
+    QPushButton *deleteImageButton = new QPushButton(UIConstants().DELETE_BUTTON_TITLE);
+
+    imagesActionMapper.setMapping(deleteImageButton, image.getId());
+    connect(deleteImageButton, SIGNAL(clicked()), &imagesActionMapper, SLOT(map()));
+    connect(&imagesActionMapper, SIGNAL(mappedString(QString)), this, SLOT(on_deleteImageTapped(int)));
+
+    layout->addWidget(imageLabel);
+    layout->addWidget(deleteImageButton);
+
+    flowLayout->addWidget(deleteButtonWidget);
 }
 
 void MainWindow::on_openImageTapped()
 {
     QString fileName = this->fileOperationsManager.openFile(this);
-    showImage(fileName.toStdString());
-    fileOperationsManager.saveImage(fileName);
+
+    Image image = Image(fileName.toStdString(), fileOperationsManager.getDominantColor(fileName));
+    db.createImage(image);
+
+    showImage(image);
+}
+
+void MainWindow::on_deleteImageTapped(int id) {
+    //TODO: Get Image by id for DB and delete
+
+    flowLayout->clearLayout();
 }
 
 void MainWindow::on_colorTapped(QString hex)
