@@ -17,7 +17,7 @@ DatabaseModule::DatabaseModule() {
     db.setUserName("postgres");
     // Change to own password
     // Should we use an env var?
-    db.setPassword("PASSWORD");
+    db.setPassword("password");
     bool ok = db.open();
     if (ok) {
         this->initialSetup();
@@ -68,7 +68,7 @@ void DatabaseModule::initialSetup() {
 
 }
 
-void DatabaseModule::createImage(Image image) {
+void DatabaseModule::createImage(Image& image) {
     QSqlQuery qry(this->db);
     qry.prepare("INSERT INTO images (path, dominant_color_id) VALUES (:path, :dominant_color_id)");
     qry.bindValue(":path", QString::fromStdString(image.getPath().string()));
@@ -109,12 +109,28 @@ std::vector<Image> DatabaseModule::readImages(Color color) {
     return images;
 }
 
-void DatabaseModule::deleteImage(Image image) {
+bool DatabaseModule::deleteImage(Image& image) {
     QSqlQuery qry(this->db);
     qry.prepare("DELETE FROM images WHERE image_id = :id");
     qry.bindValue(":id", image.getId());
     if (!qry.exec()) {
         qDebug() << qry.lastError();
+        return false;
+    } else {
+        image.setValid(false);
+        return true;
+    }
+}
+
+bool DatabaseModule::deleteImage(int id) {
+    QSqlQuery qry(this->db);
+    qry.prepare("DELETE FROM images WHERE image_id = :id");
+    qry.bindValue(":id", id);
+    if (!qry.exec()) {
+        qDebug() << qry.lastError();
+        return false;
+    } else {
+        return true;
     }
 }
 
