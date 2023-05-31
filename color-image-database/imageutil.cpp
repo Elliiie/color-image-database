@@ -3,7 +3,7 @@
 
 QColor ImageUtil::dominantColor(const QImage& image)
 {
-    std::vector<int> histogram(360);
+    std::vector<int> histogram(360, 0);
 
     // Loop through the rows and count hue values.
     for (int y = 0; y < image.height(); ++y) {

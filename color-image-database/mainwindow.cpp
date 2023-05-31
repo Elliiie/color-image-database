@@ -100,7 +100,7 @@ void MainWindow::showImagesWithDominantColor(QString hex)
 
 void MainWindow::showImage(Image image)
 {
-    std::string path = image.getPath();
+    std::string path = image.getPath().u8string();
     if(path.empty()) { return; }
 
     QWidget* deleteButtonWidget = new QWidget();
