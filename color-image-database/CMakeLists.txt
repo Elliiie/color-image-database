@@ -31,6 +31,10 @@ set(PROJECT_SOURCES
         constants.cpp
         fileOperationsManager.h
         fileOperationsManager.cpp
+        colorconverter.h
+        colorconverter.cpp
+        imageutil.h
+        imageutil.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

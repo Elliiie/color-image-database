@@ -1,12 +1,11 @@
 #include "databasemodule.h"
 #include "qdebug.h"
+#include "Constants.cpp"
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QVariant>
 #include <iostream>
 #include <string>
-
-const QString COLORS[3] = {"#fcba03", "#000000", "#ffffff"};
 
 DatabaseModule::DatabaseModule() {
     this->db = QSqlDatabase::addDatabase("QPSQL", "colors");
@@ -56,7 +55,7 @@ void DatabaseModule::initialSetup() {
     // Insert default colors if they do not exist
     bool colorsTableIsEmpty = this->readColors().empty();
     if (colorsTableIsEmpty) {
-        for (QString color : COLORS) {
+        for (QString color : UIConstants().COLORS) {
             qry.prepare("INSERT INTO colors (hex) VALUES (:hex)");
             qry.bindValue(":hex", color);
             if (!qry.exec())
