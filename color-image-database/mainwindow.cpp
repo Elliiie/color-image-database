@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->fileOperationsManager = FileOperationsManager(&db);
 //    this->testDb();
-
+    this->db.wipeDatabase();
     this->setupMainLayout();
 
     this->showSavedImages();
@@ -100,7 +100,8 @@ void MainWindow::showImagesWithDominantColor(QString hex)
 
 void MainWindow::showImage(Image image)
 {
-    std::string path = image.getPath().u8string();
+    std::string path = image.getPath().string();
+
     if(path.empty()) { return; }
 
     QWidget* deleteButtonWidget = new QWidget();
@@ -116,7 +117,7 @@ void MainWindow::showImage(Image image)
 
     imagesActionMapper.setMapping(deleteImageButton, image.getId());
     connect(deleteImageButton, SIGNAL(clicked()), &imagesActionMapper, SLOT(map()));
-    connect(&imagesActionMapper, SIGNAL(mappedString(QString)), this, SLOT(on_deleteImageTapped(int)));
+    connect(&imagesActionMapper, SIGNAL(mappedInt(int)), this, SLOT(on_deleteImageTapped(int)));
 
     layout->addWidget(imageLabel);
     layout->addWidget(deleteImageButton);
@@ -136,7 +137,7 @@ void MainWindow::on_openImageTapped()
 
 void MainWindow::on_deleteImageTapped(int id) {
     //TODO: Get Image by id for DB and delete
-
+    this->db.deleteImage(id);
     flowLayout->clearLayout();
 }
 

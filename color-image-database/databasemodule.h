@@ -12,10 +12,11 @@ class DatabaseModule
 public:
     DatabaseModule();
     void wipeDatabase();
-    void createImage(Image image);
+    void createImage(Image& image);
     std::vector<Image> readImages();
     std::vector<Image> readImages(Color color);
-    void deleteImage(Image image);
+    bool deleteImage(Image& image);
+    bool deleteImage(int id);
     std::vector<Color> readColors();
     Color readColor(QString hex);
 private:
