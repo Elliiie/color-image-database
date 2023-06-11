@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->fileOperationsManager = FileOperationsManager(&db);
 //    this->testDb();
-    this->db.wipeDatabase();
+
     this->setupMainLayout();
 
     this->showSavedImages();
