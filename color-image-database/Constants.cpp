@@ -14,3 +14,8 @@ struct UIConstants
                                "#00ffaa", "#00ffff", "#00aaff", "#0055ff", "#0000ff", "#5500ff",
                                "#aa00ff", "#ff00ff", "#ff00aa", "#ff0055"};
 };
+
+struct DBConstants {
+    const QString DB_NAME = "colors";
+    const char * DB_PASS_ENV_VAR = "POSTGRESQL_PASSWORD";
+};

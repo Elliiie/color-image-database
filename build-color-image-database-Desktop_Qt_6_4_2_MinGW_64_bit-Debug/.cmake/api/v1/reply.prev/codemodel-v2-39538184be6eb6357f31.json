@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-ce8352300432451fd597.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "color-image-database",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "color-image-database::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-color-image-database-Debug-a6d49aea28469e2345b7.json",
+					"name" : "color-image-database",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "color-image-database_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-color-image-database_autogen-Debug-9259c53c10c062005849.json",
+					"name" : "color-image-database_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "color-image-database_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-color-image-database_autogen_timestamp_deps-Debug-fb32677533ddb841102f.json",
+					"name" : "color-image-database_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/ilian/Documents/GitHub/color-image-database/build-color-image-database-Desktop_Qt_6_4_2_MinGW_64_bit-Debug",
+		"source" : "C:/Users/ilian/Documents/GitHub/color-image-database/color-image-database"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

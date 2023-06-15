@@ -33,8 +33,7 @@ void FileOperationsManager::saveImage(QString fullName)
     std::vector<Color> colors = db->readColors();
     Color dominantColor = ImageUtil::dominantColorFrom(fullName, colors);
 
-    int id = db->readImages().size() + 1;
-    Image image = Image(id, fullName.toStdString(), dominantColor);
+    Image image = Image(fullName.toStdString(), dominantColor);
     db->createImage(image);
 }
 

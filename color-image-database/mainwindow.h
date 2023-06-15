@@ -21,6 +21,7 @@ public:
 private slots:
     void on_openImageTapped();
     void on_colorTapped(QString hex);
+    void on_deleteImageTapped(int id);
 
 private:
     Ui::MainWindow *ui;

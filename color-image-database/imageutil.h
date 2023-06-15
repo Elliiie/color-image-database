@@ -9,7 +9,7 @@
 class ImageUtil
 {
 public:
-    static Color dominantColorFrom(QString imagePath, std::vector<Color> colors);
+    static Color dominantColorFrom(QString imagePath, const std::vector<Color>& colors);
 
 private:
     static QColor dominantColor(const QImage& image); // Histogram approach

@@ -10,6 +10,9 @@
 #include "QtWidgets/qlabel.h"
 #include <QPixmap>
 
+#include <chrono>
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -20,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->fileOperationsManager = FileOperationsManager(&db);
 //    this->testDb();
-
     this->setupMainLayout();
 
     this->showSavedImages();
@@ -111,8 +113,20 @@ void MainWindow::showImage(std::string name)
 void MainWindow::on_openImageTapped()
 {
     QString fileName = this->fileOperationsManager.openFile(this);
-    showImage(fileName.toStdString());
     fileOperationsManager.saveImage(fileName);
+
+    showImage(fileName.toStdString());
+}
+
+void MainWindow::on_deleteImageTapped(int id) {
+    //TODO: Get Image by id for DB and delete
+    this->db.deleteImage(id);
+    auto start = std::chrono::high_resolution_clock::now();
+    flowLayout->clearLayout();
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    std::cout << duration.count() << " microseconds" << std::endl;
+    this->showSavedImages();
 }
 
 void MainWindow::on_colorTapped(QString hex)
@@ -155,7 +169,7 @@ void MainWindow::testDb() {
         std::cout << image;
     }
     std::cout << "After deletion:" << std::endl;
-    this->db.deleteImage(allImagesFromDb[0]);
+    this->db.deleteImage(allImagesFromDb[0].getId());
     allImagesFromDb = this->db.readImages();
     assert(allImagesFromDb.size() == 2);
     for (auto image : imagesFromDb) {

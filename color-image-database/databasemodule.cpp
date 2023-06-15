@@ -8,13 +8,17 @@
 #include <string>
 
 DatabaseModule::DatabaseModule() {
-    this->db = QSqlDatabase::addDatabase("QPSQL", "colors");
+    this->db = QSqlDatabase::addDatabase("QPSQL", DBConstants().DB_NAME);
     db.setHostName("127.0.0.1");
     db.setDatabaseName("postgres");
     db.setUserName("postgres");
-    // Change to own password
-    // Should we use an env var?
-    db.setPassword("PASSWORD");
+
+    if(const char* env_p = std::getenv(DBConstants().DB_PASS_ENV_VAR)) {
+        db.setPassword(env_p);
+    } else {
+        qDebug() << "Please set an env variable called " << DBConstants().DB_PASS_ENV_VAR << " to your PostgreSQL password.";
+    }
+
     bool ok = db.open();
     if (ok) {
         this->initialSetup();
@@ -39,19 +43,22 @@ void DatabaseModule::wipeDatabase() {
     this->initialSetup();
 }
 
+void DatabaseModule::createTable(QString tableName, QString tableStructure) {
+    QSqlQuery qry(this->db);
+    QString creationQry  = QString("CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (").append(tableStructure).append(");");
+    if(!qry.exec(creationQry))
+        qDebug() << qry.lastError();
+    else
+        qDebug() << tableName << "table created or already exists, proceeding...";
+}
+
 void DatabaseModule::initialSetup() {
     qDebug() << "Setting up database connection...";
+
+    createTable(QString("colors"), QString("color_id SERIAL NOT NULL PRIMARY KEY, hex CHAR(7) NOT NULL"));
+    createTable(QString("images"), QString("image_id SERIAL NOT NULL PRIMARY KEY, path VARCHAR(100), dominant_color_id_1 INT, CONSTRAINT fk_dominant_color FOREIGN KEY(dominant_color_id) REFERENCES colors(color_id)"));
+
     QSqlQuery qry(this->db);
-    if(!qry.exec(QString("CREATE TABLE IF NOT EXISTS colors (color_id SERIAL NOT NULL PRIMARY KEY, hex CHAR(7) NOT NULL) ")))
-        qDebug() << qry.lastError();
-    else
-        qDebug() << "colors table created or already exists!";
-
-    if(!qry.exec(QString("CREATE TABLE IF NOT EXISTS images (image_id SERIAL NOT NULL PRIMARY KEY, path VARCHAR(100), dominant_color_id INT, CONSTRAINT fk_dominant_color FOREIGN KEY(dominant_color_id) REFERENCES colors(color_id));")))
-        qDebug() << qry.lastError();
-    else
-        qDebug() << "images table created or already exists!";
-
     // Insert default colors if they do not exist
     bool colorsTableIsEmpty = this->readColors().empty();
     if (colorsTableIsEmpty) {
@@ -106,10 +113,10 @@ std::vector<Image> DatabaseModule::readImages(Color color) {
     return images;
 }
 
-void DatabaseModule::deleteImage(Image image) {
+void DatabaseModule::deleteImage(int id) {
     QSqlQuery qry(this->db);
     qry.prepare("DELETE FROM images WHERE image_id = :id");
-    qry.bindValue(":id", image.getId());
+    qry.bindValue(":id", id);
     if (!qry.exec()) {
         qDebug() << qry.lastError();
     }
