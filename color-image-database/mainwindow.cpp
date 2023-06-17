@@ -128,7 +128,7 @@ void MainWindow::showImage(Image image)
 
     // Delete image button; Added to the widget holding image's actions and information
     QPushButton *deleteImageButton = new QPushButton(UIConstants().DELETE_BUTTON_TITLE);
-    connect(deleteImageButton, &QPushButton::clicked, [this, image, imageWidget]() {
+    connect(deleteImageButton, &QPushButton::clicked, [this, imageWidget]() {
         flowLayout->removeWidget(imageWidget);
         delete imageWidget;
     });
