@@ -112,28 +112,25 @@ void MainWindow::showImage(Image image)
     if(path.empty()) { return; }
 
     // Widget for the image and its actions and inforamtion
-    QWidget* imageWidget = new QWidget();
-    QVBoxLayout* elementLayout = new QVBoxLayout(imageWidget);
+    QWidget *imageWidget = new QWidget();
+    QVBoxLayout *elementLayout = new QVBoxLayout();
     imageWidget->setLayout(elementLayout);
-    imageWidget->setAccessibleName(QString::number(image.getId()));
 
     // Label representing the image; Added directrly to the main widget
     QPixmap pic(QString::fromStdString(path));
     QLabel *imageLabel = new QLabel();
     imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
-    elementLayout->addWidget(imageLabel);
 
     // Image actions and inforamtion widget
-    QWidget* buttonActionsAndInfoWidget = new QWidget();
-    QHBoxLayout* buttonActionsAndInfoLayout = new QHBoxLayout(imageWidget);
+    QWidget *buttonActionsAndInfoWidget = new QWidget();
+    QHBoxLayout *buttonActionsAndInfoLayout = new QHBoxLayout();
     buttonActionsAndInfoWidget->setLayout(buttonActionsAndInfoLayout);
 
     // Delete image button; Added to the widget holding image's actions and information
     QPushButton *deleteImageButton = new QPushButton(UIConstants().DELETE_BUTTON_TITLE);
-    connect(deleteImageButton, &QPushButton::clicked, [this, image]() {
-        this->db.deleteImage(image.getId());
-        flowLayout->clearLayout();
-        showSavedImages();
+    connect(deleteImageButton, &QPushButton::clicked, [this, image, imageWidget]() {
+        flowLayout->removeWidget(imageWidget);
+        delete imageWidget;
     });
     buttonActionsAndInfoLayout->addWidget(deleteImageButton);
 
