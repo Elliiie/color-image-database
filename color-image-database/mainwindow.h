@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "QtCore/qsignalmapper.h"
 #include "fileOperationsManager.h"
 #include "flowLayout.h"
 
@@ -20,15 +19,12 @@ public:
 
 private slots:
     void on_openImageTapped();
-    void on_deleteImageTapped(int id);
     void on_colorTapped(QString hex);
 
 private:
     Ui::MainWindow *ui;
     FlowLayout *flowLayout;
     QHBoxLayout* buttons;
-    QSignalMapper colorsMapper;
-    QSignalMapper imagesActionMapper;
 
     DatabaseModule db;
     FileOperationsManager fileOperationsManager;

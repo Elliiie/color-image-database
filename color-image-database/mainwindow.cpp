@@ -65,13 +65,20 @@ void MainWindow::setupColorButtons()
         QString buttonColor = QString("background-color: %1").arg(color.getHex());
         button->setStyleSheet(buttonColor);
 
-        colorsMapper.setMapping(button, color.getHex());
-        connect(button, SIGNAL(clicked()), &colorsMapper, SLOT(map()));
+        connect(button,  &QPushButton::clicked, [this, color]() {
+            on_colorTapped(color.getHex());
+        });
 
         colors->addWidget(button);
     }
 
-    connect(&colorsMapper, SIGNAL(mappedString(QString)), this, SLOT(on_colorTapped(QString)));
+    QPushButton *button = new QPushButton("ALL");
+    button->setFixedSize(QSize(40, 40));
+    connect(button,  &QPushButton::clicked, [this]() {
+        showSavedImages();
+    });
+    colors->addWidget(button);
+
     buttons->addItem(colors);
 }
 
@@ -104,25 +111,44 @@ void MainWindow::showImage(Image image)
 
     if(path.empty()) { return; }
 
-    QWidget* deleteButtonWidget = new QWidget();
+    // Widget for the image and its actions and inforamtion
+    QWidget* imageWidget = new QWidget();
+    QVBoxLayout* elementLayout = new QVBoxLayout(imageWidget);
+    imageWidget->setLayout(elementLayout);
+    imageWidget->setAccessibleName(QString::number(image.getId()));
 
-    QVBoxLayout* layout = new QVBoxLayout(deleteButtonWidget);
-    deleteButtonWidget->setLayout(layout);
-
+    // Label representing the image; Added directrly to the main widget
     QPixmap pic(QString::fromStdString(path));
     QLabel *imageLabel = new QLabel();
     imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
+    elementLayout->addWidget(imageLabel);
 
+    // Image actions and inforamtion widget
+    QWidget* buttonActionsAndInfoWidget = new QWidget();
+    QHBoxLayout* buttonActionsAndInfoLayout = new QHBoxLayout(imageWidget);
+    buttonActionsAndInfoWidget->setLayout(buttonActionsAndInfoLayout);
+
+    // Delete image button; Added to the widget holding image's actions and information
     QPushButton *deleteImageButton = new QPushButton(UIConstants().DELETE_BUTTON_TITLE);
+    connect(deleteImageButton, &QPushButton::clicked, [this, image]() {
+        this->db.deleteImage(image.getId());
+        flowLayout->clearLayout();
+        showSavedImages();
+    });
+    buttonActionsAndInfoLayout->addWidget(deleteImageButton);
 
-    imagesActionMapper.setMapping(deleteImageButton, image.getId());
-    connect(deleteImageButton, SIGNAL(clicked()), &imagesActionMapper, SLOT(map()));
-    connect(&imagesActionMapper, SIGNAL(mappedInt(int)), this, SLOT(on_deleteImageTapped(int)));
+    // Label representing image's dominant color; Added to the widget holding image's actions and information
+    QLabel *imageColorLabel = new QLabel;
+    QString imageDominantColor = QString("background-color: %1").arg(image.getDominantColor().getHex());
+    imageColorLabel->setStyleSheet(imageDominantColor);
+    buttonActionsAndInfoLayout->addWidget(imageColorLabel);
 
-    layout->addWidget(imageLabel);
-    layout->addWidget(deleteImageButton);
+    // Add all elements to the main layout
+    elementLayout->addWidget(imageLabel);
+    elementLayout->addWidget(buttonActionsAndInfoWidget);
 
-    flowLayout->addWidget(deleteButtonWidget);
+    // Add image layout to the flow layout
+    flowLayout->addWidget(imageWidget);
 }
 
 void MainWindow::on_openImageTapped()
@@ -133,12 +159,6 @@ void MainWindow::on_openImageTapped()
     db.createImage(image);
 
     showImage(image);
-}
-
-void MainWindow::on_deleteImageTapped(int id) {
-    //TODO: Get Image by id for DB and delete
-    this->db.deleteImage(id);
-    flowLayout->clearLayout();
 }
 
 void MainWindow::on_colorTapped(QString hex)
