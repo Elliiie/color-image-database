@@ -32,8 +32,10 @@ void FileOperationsManager::saveImage(QString fullName)
 
     std::vector<Color> colors = db->readColors();
     Color dominantColor = ImageUtil::dominantColorFrom(fullName, colors);
+    // TODO: Set correct algo
+    std::map<QString, Color> m{{DBConstants().ALGORITHMS[0], dominantColor}};
 
-    Image image = Image(fullName.toStdString(), dominantColor);
+    Image image = Image(fullName.toStdString(), m);
     db->createImage(image);
 }
 

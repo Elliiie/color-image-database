@@ -10,6 +10,7 @@ public:
     Color();
     Color(int id, QString hex);
     QString getHex() const;
+    QString toQString() const;
 private:
     QString hex;
 };

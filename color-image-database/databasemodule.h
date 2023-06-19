@@ -13,6 +13,7 @@ public:
     DatabaseModule();
     void createTable(QString tableName, QString tableStructure);
     void wipeDatabase();
+    std::vector<QString> readAlgorithms();
     void createImage(Image image);
     std::vector<Image> readImages();
     std::vector<Image> readImages(Color color);

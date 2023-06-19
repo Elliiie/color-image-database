@@ -18,4 +18,6 @@ struct UIConstants
 struct DBConstants {
     const QString DB_NAME = "colors";
     const char * DB_PASS_ENV_VAR = "POSTGRESQL_PASSWORD";
+
+    const std::vector<QString> ALGORITHMS = {"histogram", "k-means"};
 };
