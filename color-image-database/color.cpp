@@ -21,6 +21,12 @@ QString Color::toQString() const {
     return QString::fromStdString(str);
 }
 
+QColor Color::toQColor() const {
+    QColor color;
+
+    return color.fromString(hex);
+}
+
 std::ostream& operator << (std::ostream &os, const Color &c) {
     return (os << "-----" << "Id: " << c.getId() << "\n Hex: " << c.getHex().toStdString() << "\n-----" << std::endl);
 }

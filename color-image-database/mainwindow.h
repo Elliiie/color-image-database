@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "QtCore/qsignalmapper.h"
 #include "fileOperationsManager.h"
 #include "flowLayout.h"
 
@@ -27,7 +26,6 @@ private:
     Ui::MainWindow *ui;
     FlowLayout *flowLayout;
     QHBoxLayout* buttons;
-    QSignalMapper mapper;
 
     DatabaseModule db;
     FileOperationsManager fileOperationsManager;
@@ -40,6 +38,6 @@ private:
 
     void showSavedImages();
     void showImagesWithDominantColor(QString hex);
-    void showImage(std::string name);
+    void showImage(Image image);
 };
 #endif // MAINWINDOW_H

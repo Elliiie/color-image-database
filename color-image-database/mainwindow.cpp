@@ -68,13 +68,20 @@ void MainWindow::setupColorButtons()
         QString buttonColor = QString("background-color: %1").arg(color.getHex());
         button->setStyleSheet(buttonColor);
 
-        mapper.setMapping(button, color.getHex());
-        connect(button, SIGNAL(clicked()), &mapper, SLOT(map()));
+        connect(button,  &QPushButton::clicked, [this, color]() {
+            on_colorTapped(color.getHex());
+        });
 
         colors->addWidget(button);
     }
 
-    connect(&mapper, SIGNAL(mappedString(QString)), this, SLOT(on_colorTapped(QString)));
+    QPushButton *button = new QPushButton("ALL");
+    button->setFixedSize(QSize(40, 40));
+    connect(button,  &QPushButton::clicked, [this]() {
+        showSavedImages();
+    });
+    colors->addWidget(button);
+
     buttons->addItem(colors);
 }
 
@@ -88,46 +95,73 @@ void MainWindow::setupLoadImageButton()
 
 void MainWindow::showSavedImages()
 {
-    for(Image image: fileOperationsManager.loadImages()) {
-        showImage(image.getPath().u8string());
+    for(Image image: db.readImages()) {
+        showImage(image);
     }
 }
 
 void MainWindow::showImagesWithDominantColor(QString hex)
 {
-    for(Image image: fileOperationsManager.loadImages(hex)) {
-        showImage(image.getPath().u8string());
+     Color color = db.readColor(hex);
+    for(Image image: db.readImages(color)) {
+        showImage(image);
     }
 }
 
-void MainWindow::showImage(std::string name)
+void MainWindow::showImage(Image image)
 {
-    if(name.empty()) { return; }
+    std::string path = image.getPath().string();
 
-    QPixmap pic(QString::fromStdString(name));
+    if(path.empty()) { return; }
+
+    // Widget for the image and its actions and inforamtion
+    QWidget *imageWidget = new QWidget();
+    QVBoxLayout *elementLayout = new QVBoxLayout();
+    imageWidget->setLayout(elementLayout);
+
+    // Label representing the image; Added directrly to the main widget
+    QPixmap pic(QString::fromStdString(path));
     QLabel *imageLabel = new QLabel();
     imageLabel->setPixmap(pic.scaled(UIConstants().IMAGE_WIDTH, UIConstants().IMAGE_HEIGHT));
 
-    flowLayout->addWidget(imageLabel);
+    // Image actions and inforamtion widget
+    QWidget *buttonActionsAndInfoWidget = new QWidget();
+    QHBoxLayout *buttonActionsAndInfoLayout = new QHBoxLayout();
+    buttonActionsAndInfoWidget->setLayout(buttonActionsAndInfoLayout);
+
+    // Delete image button; Added to the widget holding image's actions and information
+    QPushButton *deleteImageButton = new QPushButton(UIConstants().DELETE_BUTTON_TITLE);
+    connect(deleteImageButton, &QPushButton::clicked, [this, imageWidget, image]() {
+        // Delete image from UI
+        flowLayout->removeWidget(imageWidget);
+        delete imageWidget;
+        // Delete image from DB
+        db.deleteImage(image.getId());
+    });
+    buttonActionsAndInfoLayout->addWidget(deleteImageButton);
+
+    // Label representing image's dominant color; Added to the widget holding image's actions and information
+    QLabel *imageColorLabel = new QLabel;
+    QString imageDominantColor = QString("background-color: %1").arg(image.getDominantColor().getHex());
+    imageColorLabel->setStyleSheet(imageDominantColor);
+    buttonActionsAndInfoLayout->addWidget(imageColorLabel);
+
+    // Add all elements to the main layout
+    elementLayout->addWidget(imageLabel);
+    elementLayout->addWidget(buttonActionsAndInfoWidget);
+
+    // Add image layout to the flow layout
+    flowLayout->addWidget(imageWidget);
 }
 
 void MainWindow::on_openImageTapped()
 {
     QString fileName = this->fileOperationsManager.openFile(this);
-    fileOperationsManager.saveImage(fileName);
 
-    showImage(fileName.toStdString());
-}
+    Image image = Image(fileName.toStdString(), fileOperationsManager.getDominantColor(fileName));
+    db.createImage(image);
 
-void MainWindow::on_deleteImageTapped(int id) {
-    //TODO: Get Image by id for DB and delete
-    this->db.deleteImage(id);
-    auto start = std::chrono::high_resolution_clock::now();
-    flowLayout->clearLayout();
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    std::cout << duration.count() << " microseconds" << std::endl;
-    this->showSavedImages();
+    showImage(image);
 }
 
 void MainWindow::on_colorTapped(QString hex)

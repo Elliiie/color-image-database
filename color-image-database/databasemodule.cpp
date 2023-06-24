@@ -108,7 +108,7 @@ std::vector<QString> DatabaseModule::readAlgorithms() {
     return algorithms;
 }
 
-void DatabaseModule::createImage(Image image) {
+void DatabaseModule::createImage(Image& image) {
     QSqlQuery qry(this->db);
     qry.prepare("INSERT INTO images (path) VALUES (:path)");
     qry.bindValue(":path", QString::fromStdString(image.getPath().string()));
@@ -192,7 +192,7 @@ std::vector<Image> DatabaseModule::readImages(Color color) {
     return images;
 }
 
-void DatabaseModule::deleteImage(int id) {
+bool DatabaseModule::deleteImage(int id) {
     QSqlQuery qry(this->db);
 
     qry.prepare("DELETE FROM images_colors WHERE image_id = :id");
@@ -205,6 +205,9 @@ void DatabaseModule::deleteImage(int id) {
     qry.bindValue(":id", id);
     if (!qry.exec()) {
         qDebug() << qry.lastError();
+        return false;
+    } else {
+        return true;
     }
 }
 
