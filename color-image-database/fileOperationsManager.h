@@ -1,7 +1,6 @@
 #ifndef FILEOPERATIONSMANAGER_H
 #define FILEOPERATIONSMANAGER_H
 
-#include "QtCore/qstring.h"
 #include "databasemodule.h"
 
 
@@ -11,9 +10,7 @@ public:
     FileOperationsManager(DatabaseModule* db);
     FileOperationsManager();
     QString openFile(QWidget *parent) const;
-    void saveImage(QString fullName);
-    std::vector<Image> loadImages();
-    std::vector<Image> loadImages(QString hex);
+    Color getDominantColor(QString fullName);
 
 private:
     DatabaseModule* db;

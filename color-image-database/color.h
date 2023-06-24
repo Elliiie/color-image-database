@@ -3,6 +3,7 @@
 
 #include "databaseobject.h"
 #include <QString>
+#include <QColor>
 
 class Color: public DatabaseObject
 {
@@ -10,6 +11,7 @@ public:
     Color();
     Color(int id, QString hex);
     QString getHex() const;
+    QColor toQColor() const;
 private:
     QString hex;
 };
