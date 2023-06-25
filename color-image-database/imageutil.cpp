@@ -1,9 +1,9 @@
 #include "imageutil.h"
 #include "constants.cpp"
 
-QColor ImageUtil::dominantColor(const QImage& image)
+QColor ImageUtil::dominantColorHistogram(const QImage& image)
 {
-    std::vector<int> histogram(UIConstants().HUE_HISTOGRAM_SIZE, 0);
+    std::vector<int> histogram(UIConstants().HUE_HISTOGRAM_SIZE);
 
     // Loop through the rows and count hue values.
     for (int y = 0; y < image.height(); ++y) {
@@ -33,10 +33,128 @@ QColor ImageUtil::dominantColor(const QImage& image)
     return QColor::fromHsv(dominantHue, UIConstants().HSV_SATURATION, UIConstants().HSV_VALUE);
 }
 
-Color ImageUtil::dominantColorFrom(QString imagePath, const std::vector<Color>& colors) {
+void ImageUtil::initializeCentroidsRandomly(const std::vector<QColor>& colors, std::vector<QColor>& centroids, int clustersCount) {
+    std::srand(time(nullptr));
+
+    // Keep track of which colors have already been selected for centroids.
+    std::vector<bool> selected(colors.size());
+
+    for (int i = 0; i < clustersCount; ++i) {
+        int randomIndex = std::rand() % colors.size();
+        while (selected[randomIndex]) {
+            randomIndex = std::rand() % colors.size();
+        }
+
+        selected[randomIndex] = true;
+        centroids[i] = colors[randomIndex];
+    }
+}
+
+double ImageUtil::colorDistance(const QColor& firstColor, const QColor& secondColor) {
+    int redDiff = firstColor.red() - secondColor.red();
+    int greenDiff = firstColor.green() - secondColor.green();
+    int blueDiff = firstColor.blue() - secondColor.blue();
+
+    return std::sqrt(redDiff * redDiff + greenDiff * greenDiff + blueDiff * blueDiff);
+}
+
+void ImageUtil::assignColorsToCentroids(const std::vector<QColor>& colors, const std::vector<QColor>& centroids, std::vector<int>& assignments) {
+    for (int i = 0; i < colors.size(); ++i) {
+        double minDistance = std::numeric_limits<double>::max();
+        int closestCentroidIndex = -1;
+
+        for (int j = 0; j < centroids.size(); ++j) {
+            double distance = colorDistance(colors[i], centroids[j]);
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCentroidIndex = j;
+            }
+        }
+
+        assignments[i] = closestCentroidIndex;
+    }
+}
+
+void ImageUtil::calculateNewCentroids(const std::vector<QColor>& colors, const std::vector<int>& assignments, std::vector<QColor>& centroids) {
+    std::vector<int> clusterSizes(centroids.size());
+    std::vector<int> redSums(centroids.size());
+    std::vector<int> greenSums(centroids.size());
+    std::vector<int> blueSums(centroids.size());
+
+    for (int i = 0; i < colors.size(); ++i) {
+        int clusterIndex = assignments[i];
+
+        clusterSizes[clusterIndex]++;
+        redSums[clusterIndex] += colors[i].red();
+        greenSums[clusterIndex] += colors[i].green();
+        blueSums[clusterIndex] += colors[i].blue();
+    }
+
+    for (int i = 0; i < centroids.size(); ++i) {
+        if (clusterSizes[i] > 0) {
+            int redMean = redSums[i] / clusterSizes[i];
+            int greenMean = greenSums[i] / clusterSizes[i];
+            int blueMean = blueSums[i] / clusterSizes[i];
+
+            centroids[i] = QColor(redMean, greenMean, blueMean);
+        }
+    }
+}
+
+QColor ImageUtil::dominantColorKMeans(const QImage& image) {
+    std::vector<QColor> colors;
+
+    for (int y = 0; y < image.height(); ++y) {
+        const QRgb* row = reinterpret_cast<const QRgb*>(image.constScanLine(y));
+        const QRgb* end = row + image.width();
+
+        while (row < end) {
+            QColor pixelColor = QColor::fromRgb(*row++);
+            colors.push_back(pixelColor);
+        }
+    }
+
+    // Initialize the centroids randomly.
+    std::vector<QColor> centroids(2);
+    initializeCentroidsRandomly(colors, centroids, 2);
+
+    // Keep track of which color is assigned to which centroid.
+    std::vector<int> assignments(colors.size());
+
+    // Run the k-means algorithm.
+    assignColorsToCentroids(colors, centroids, assignments);
+    calculateNewCentroids(colors, assignments, centroids);
+
+    // Find the cluster with the most assigned colors.
+    int maxCount = 0;
+    QColor dominantColor;
+
+    for (int i = 0; i < centroids.size(); ++i) {
+        int count = std::count(assignments.begin(), assignments.end(), i);
+        if (count > maxCount) {
+            maxCount = count;
+            dominantColor = centroids[i];
+        }
+    }
+
+    return dominantColor;
+}
+
+Color ImageUtil::dominantColorFrom(QString imagePath, const std::vector<Color>& colors, QString algorithm) {
     QImage image(imagePath);
 
-    QColor dominantColor = ImageUtil::dominantColor(image);
+    QColor dominantColor;
+
+    if (algorithm == "histogram") {
+        dominantColor = dominantColorHistogram(image);
+    }
+    else if (algorithm == "k-means") {
+        dominantColor = dominantColorKMeans(image);
+    }
+    else {
+        dominantColor = QColor(0, 0, 0);
+    }
 
     Color closestColor;
     int closestHue = 360;
