@@ -29,8 +29,10 @@ private:
     QHBoxLayout* buttons;
     QComboBox *picker;
     std::vector<QPushButton> colorButtons;
+
     // -1 means all colors
-    int selectedButtonIdx = -1;
+    int selectedButtonIndex = -1;
+    std::vector<Color> savedColors;
 
     DatabaseModule db;
     FileOperationsManager fileOperationsManager;
@@ -45,5 +47,9 @@ private:
     void showSavedImages();
     void showImagesWithDominantColor(QString hex);
     void showImage(Image image);
+
+    void unhighlightImageWithIndex(int index);
+    void highlightImageWithIndex(int index);
+    void unhighlightSelectedIndexIfNeeded();
 };
 #endif // MAINWINDOW_H
