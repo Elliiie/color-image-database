@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "QtWidgets/qcombobox.h"
 #include "fileOperationsManager.h"
 #include "flowLayout.h"
 
@@ -25,6 +26,7 @@ private:
     Ui::MainWindow *ui;
     FlowLayout *flowLayout;
     QHBoxLayout* buttons;
+    QComboBox *picker;
 
     DatabaseModule db;
     FileOperationsManager fileOperationsManager;
@@ -34,6 +36,7 @@ private:
     void setupMainLayout();
     void setupLoadImageButton();
     void setupColorButtons();
+    void setupAlgorithmPicker();
 
     void showSavedImages();
     void showImagesWithDominantColor(QString hex);
