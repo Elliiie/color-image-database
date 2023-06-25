@@ -11,7 +11,9 @@ public:
     FileOperationsManager();
     QString openFile(QWidget *parent) const;
     Color getDominantColor(QString fullName);
-
+    Image saveImage(QString fullName);
+    std::vector<Image> loadImages();
+    std::vector<Image> loadImages(QString hex);
 private:
     DatabaseModule* db;
 };

@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->fileOperationsManager = FileOperationsManager(&db);
 //    this->testDb();
-//    this->db.wipeDatabase();
+    this->db.wipeDatabase();
     this->setupMainLayout();
 
     this->showSavedImages();
@@ -142,7 +142,7 @@ void MainWindow::showImage(Image image)
 
     // Label representing image's dominant color; Added to the widget holding image's actions and information
     QLabel *imageColorLabel = new QLabel;
-    QString imageDominantColor = QString("background-color: %1").arg(image.getDominantColor().getHex());
+    QString imageDominantColor = QString("background-color: %1").arg(image.getDominantColors().at(DBConstants().ALGORITHMS[0]).getHex());
     imageColorLabel->setStyleSheet(imageDominantColor);
     buttonActionsAndInfoLayout->addWidget(imageColorLabel);
 
@@ -158,9 +158,7 @@ void MainWindow::on_openImageTapped()
 {
     QString fileName = this->fileOperationsManager.openFile(this);
 
-    Image image = Image(fileName.toStdString(), fileOperationsManager.getDominantColor(fileName));
-    db.createImage(image);
-
+    Image image = this->fileOperationsManager.saveImage(fileName);
     showImage(image);
 }
 
