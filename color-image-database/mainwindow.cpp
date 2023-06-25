@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->fileOperationsManager = FileOperationsManager(&db);
 //    this->testDb();
-
+//    this->db.wipeDatabase();
     this->setupMainLayout();
 
     this->showSavedImages();
@@ -63,14 +63,21 @@ void MainWindow::setupColorButtons()
     QHBoxLayout* colors = new QHBoxLayout();
 
     std::vector<Color> savedColors = db.readColors();
+    this->colorButtons = std::vector<QPushButton>(savedColors.size());
 
-    for(Color color: savedColors) {
-        QPushButton *button = new QPushButton();
+    for(int i = 0; i < savedColors.size(); i++) {
+        QPushButton *button = &colorButtons.at(i);
+        const Color& color = savedColors.at(i);
         button->setFixedSize(UIConstants().COLOR_BUTTON_SIZE);
         QString buttonColor = QString("background-color: %1").arg(color.getHex());
         button->setStyleSheet(buttonColor);
 
-        connect(button,  &QPushButton::clicked, [this, color]() {
+        connect(button,  &QPushButton::clicked, [this, color, savedColors, i]() {
+            if (this->selectedButtonIdx > -1) {
+                colorButtons.at(selectedButtonIdx).setStyleSheet(QString("background-color: %1").arg(savedColors.at(selectedButtonIdx).getHex()));
+            }
+            selectedButtonIdx = i;
+            colorButtons.at(i).setStyleSheet(QString("background-color: %1; border-style: outset; border-width: 2px; border-color: beige;").arg(color.getHex()));
             on_colorTapped(color.getHex());
         });
 
@@ -79,7 +86,12 @@ void MainWindow::setupColorButtons()
 
     QPushButton *button = new QPushButton("ALL");
     button->setFixedSize(UIConstants().ALL_IMAGES_BUTTON_SIZE);
-    connect(button,  &QPushButton::clicked, [this]() {
+    connect(button,  &QPushButton::clicked, [this, savedColors]() {
+        if (this->selectedButtonIdx > -1) {
+            colorButtons.at(selectedButtonIdx).setStyleSheet(QString("background-color: %1").arg(savedColors.at(selectedButtonIdx).getHex()));
+        }
+        selectedButtonIdx = -1;
+        this->flowLayout->clearLayout();
         showSavedImages();
     });
     colors->addWidget(button);
@@ -100,7 +112,7 @@ void MainWindow::setupAlgorithmPicker()
     picker = new QComboBox();
     picker->setFixedSize(UIConstants().ADD_BUTTON_SIZE);
 
-    for(auto const& algorithm: DBConstants().ALGORITHMS)
+    for(const auto &algorithm: DBConstants().ALGORITHMS)
     {
         picker->addItem(algorithm.second);
     }
@@ -116,7 +128,7 @@ void MainWindow::showSavedImages()
 
 void MainWindow::showImagesWithDominantColor(QString hex)
 {
-     Color color = db.readColor(hex);
+    Color color = db.readColor(hex);
     for(Image image: db.readImages(color)) {
         showImage(image);
     }
@@ -172,7 +184,9 @@ void MainWindow::showImage(Image image)
 void MainWindow::on_openImageTapped()
 {
     QString fileName = this->fileOperationsManager.openFile(this);
-    std::cout << picker->currentText().toStdString() << std::endl;
+    if (fileName.isEmpty()) {
+        return;
+    }
     Image image = this->fileOperationsManager.saveImage(fileName);
     showImage(image);
 }

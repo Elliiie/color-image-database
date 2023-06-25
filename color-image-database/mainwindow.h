@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
 #include "QtWidgets/qcombobox.h"
 #include "fileOperationsManager.h"
 #include "flowLayout.h"
@@ -27,6 +28,9 @@ private:
     FlowLayout *flowLayout;
     QHBoxLayout* buttons;
     QComboBox *picker;
+    std::vector<QPushButton> colorButtons;
+    // -1 means all colors
+    int selectedButtonIdx = -1;
 
     DatabaseModule db;
     FileOperationsManager fileOperationsManager;
