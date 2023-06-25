@@ -78,7 +78,7 @@ void MainWindow::setupColorButtons()
     }
 
     QPushButton *button = new QPushButton("ALL");
-    button->setFixedSize(QSize(40, 40));
+    button->setFixedSize(UIConstants().ALL_IMAGES_BUTTON_SIZE);
     connect(button,  &QPushButton::clicked, [this]() {
         showSavedImages();
     });
@@ -98,9 +98,11 @@ void MainWindow::setupLoadImageButton()
 void MainWindow::setupAlgorithmPicker()
 {
     picker = new QComboBox();
-    for(QString algorithm: DBConstants().ALGORITHMS)
+    picker->setFixedSize(UIConstants().ADD_BUTTON_SIZE);
+
+    for(auto const& algorithm: DBConstants().ALGORITHMS)
     {
-        picker->addItem(algorithm);
+        picker->addItem(algorithm.second);
     }
     buttons->addWidget(picker);
 }
@@ -154,7 +156,8 @@ void MainWindow::showImage(Image image)
 
     // Label representing image's dominant color; Added to the widget holding image's actions and information
     QLabel *imageColorLabel = new QLabel;
-    QString imageDominantColor = QString("background-color: %1").arg(image.getDominantColors().at(DBConstants().ALGORITHMS[0]).getHex());
+    QString chosenAlgorithm = picker->currentText();
+    QString imageDominantColor = QString("background-color: %1").arg(image.getDominantColors().at(chosenAlgorithm).getHex());
     imageColorLabel->setStyleSheet(imageDominantColor);
     buttonActionsAndInfoLayout->addWidget(imageColorLabel);
 
@@ -193,10 +196,10 @@ void MainWindow::testDb() {
     Color black = this->db.readColor(colors[0].getHex());
     std::cout << "First color:\n " << black << std::endl;
 
-    std::map<QString, Color> m1 {{DBConstants().ALGORITHMS[0], colors[0]}};
+    std::map<QString, Color> m1 {{ DBConstants().ALGORITHMS.at(Algorithm::HISTOGRAM), colors[0]}};
     std::filesystem::path imagePath1 { "C:\\Users\\ilian\\Desktop\\image1.jpg" };
     Image image1 = Image(imagePath1, m1);
-    m1[DBConstants().ALGORITHMS[1]] = colors[5];
+    m1[DBConstants().ALGORITHMS.at(Algorithm::KMEANS)] = colors[5];
     std::filesystem::path imagePath2 { "C:\\Users\\ilian\\Desktop\\image2.jpg" };
     Image image2 = Image(imagePath2, m1);
     Image image3 = Image(imagePath2, m1);

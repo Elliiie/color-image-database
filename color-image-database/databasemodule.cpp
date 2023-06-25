@@ -73,9 +73,9 @@ void DatabaseModule::initialSetup() {
     // Insert default algorithms
     bool algorithmsTableIsEmpty = this->readAlgorithms().empty();
     if (algorithmsTableIsEmpty) {
-        for (QString algo : DBConstants().ALGORITHMS) {
+        for(auto const &algorithm: DBConstants().ALGORITHMS) {
             qry.prepare("INSERT INTO algorithms (name) VALUES (:name)");
-            qry.bindValue(":name", algo);
+            qry.bindValue(":name", algorithm.second);
             if (!qry.exec())
                    qDebug() << qry.lastError();
         }

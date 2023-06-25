@@ -1,5 +1,4 @@
 #include "imageutil.h"
-#include "constants.cpp"
 
 QColor ImageUtil::dominantColorHistogram(const QImage& image)
 {
@@ -141,19 +140,21 @@ QColor ImageUtil::dominantColorKMeans(const QImage& image) {
     return dominantColor;
 }
 
-Color ImageUtil::dominantColorFrom(QString imagePath, const std::vector<Color>& colors, QString algorithm) {
+Color ImageUtil::dominantColorFrom(QString imagePath, const std::vector<Color>& colors, Algorithm algorithm) {
     QImage image(imagePath);
 
     QColor dominantColor;
 
-    if (algorithm == "histogram") {
+    switch (algorithm) {
+    case HISTOGRAM:
         dominantColor = dominantColorHistogram(image);
-    }
-    else if (algorithm == "k-means") {
+        break;
+    case KMEANS:
         dominantColor = dominantColorKMeans(image);
-    }
-    else {
+        break;
+    default:
         dominantColor = QColor(0, 0, 0);
+        break;
     }
 
     Color closestColor;

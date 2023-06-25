@@ -5,12 +5,13 @@
 #include "color.h"
 #include "qcolor.h"
 #include "qimage.h"
+#include "constants.cpp"
 
 class ImageUtil
 {
 public:
     /// Returns the dominant color of an image from the given colors based on the given algorithm.
-    static Color dominantColorFrom(QString imagePath, const std::vector<Color>& colors, QString algorithm);
+    static Color dominantColorFrom(QString imagePath, const std::vector<Color>& colors, Algorithm algorithm);
 
 private:
     /////////////////////////////////
