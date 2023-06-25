@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "QtWidgets/qcombobox.h"
 #include "constants.cpp"
 #include <iostream>
 #include <cassert>
@@ -51,6 +52,7 @@ void MainWindow::setupMainLayout()
 
     this->setupColorButtons();
     this->setupLoadImageButton();
+    this->setupAlgorithmPicker();
 
     buttonsWidget->setLayout(buttons);
     ui->verticalLayout->addWidget(buttonsWidget);
@@ -91,6 +93,16 @@ void MainWindow::setupLoadImageButton()
     add->setMaximumSize(UIConstants().ADD_BUTTON_SIZE);
     connect(add, SIGNAL(clicked()), this, SLOT(on_openImageTapped()));
     buttons->addWidget(add);
+}
+
+void MainWindow::setupAlgorithmPicker()
+{
+    picker = new QComboBox();
+    for(QString algorithm: DBConstants().ALGORITHMS)
+    {
+        picker->addItem(algorithm);
+    }
+    buttons->addWidget(picker);
 }
 
 void MainWindow::showSavedImages()
@@ -157,7 +169,7 @@ void MainWindow::showImage(Image image)
 void MainWindow::on_openImageTapped()
 {
     QString fileName = this->fileOperationsManager.openFile(this);
-
+    std::cout << picker->currentText().toStdString() << std::endl;
     Image image = this->fileOperationsManager.saveImage(fileName);
     showImage(image);
 }
