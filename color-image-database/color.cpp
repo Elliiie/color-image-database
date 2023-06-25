@@ -16,6 +16,11 @@ QString Color::getHex() const {
     return this->hex;
 }
 
+QString Color::toQString() const {
+    std::string str = "Id:" + std::to_string(getId()) + "\n Hex: " + getHex().toStdString() + "\n-----";
+    return QString::fromStdString(str);
+}
+
 QColor Color::toQColor() const {
     QColor color;
 

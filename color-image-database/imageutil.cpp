@@ -3,7 +3,7 @@
 
 QColor ImageUtil::dominantColor(const QImage& image)
 {
-    std::vector<int> histogram(UIConstants().HUE_HISTOGRAM_SIZE);
+    std::vector<int> histogram(UIConstants().HUE_HISTOGRAM_SIZE, 0);
 
     // Loop through the rows and count hue values.
     for (int y = 0; y < image.height(); ++y) {
@@ -33,7 +33,7 @@ QColor ImageUtil::dominantColor(const QImage& image)
     return QColor::fromHsv(dominantHue, UIConstants().HSV_SATURATION, UIConstants().HSV_VALUE);
 }
 
-Color ImageUtil::dominantColorFrom(QString imagePath, std::vector<Color> colors) {
+Color ImageUtil::dominantColorFrom(QString imagePath, const std::vector<Color>& colors) {
     QImage image(imagePath);
 
     QColor dominantColor = ImageUtil::dominantColor(image);

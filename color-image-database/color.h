@@ -11,6 +11,7 @@ public:
     Color();
     Color(int id, QString hex);
     QString getHex() const;
+    QString toQString() const;
     QColor toQColor() const;
 private:
     QString hex;

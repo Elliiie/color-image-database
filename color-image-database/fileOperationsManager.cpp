@@ -26,8 +26,25 @@ QString FileOperationsManager::openFile(QWidget *parent) const
     return file.fileName();
 }
 
-Color FileOperationsManager::getDominantColor(QString fullName)
+Image FileOperationsManager::saveImage(QString fullName)
 {
     std::vector<Color> colors = db->readColors();
-    return ImageUtil::dominantColorFrom(fullName, colors);
+    Color dominantColor = ImageUtil::dominantColorFrom(fullName, colors);
+    // TODO: Set correct algo
+    std::map<QString, Color> m{{DBConstants().ALGORITHMS[0], dominantColor}};
+
+    Image image = Image(fullName.toStdString(), m);
+    db->createImage(image);
+    return image;
+}
+
+std::vector<Image> FileOperationsManager::loadImages()
+{
+    return db->readImages();
+}
+
+std::vector<Image> FileOperationsManager::loadImages(QString hex)
+{
+    Color color = db->readColor(hex);
+    return db->readImages(color);
 }
