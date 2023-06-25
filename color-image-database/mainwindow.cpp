@@ -22,10 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
     this->flowLayout = new FlowLayout();
     this->buttons = new QHBoxLayout();
 
-    db.wipeDatabase();
     this->fileOperationsManager = FileOperationsManager(&db);
 //    this->testDb();
-    this->db.wipeDatabase();
+
     this->setupMainLayout();
 
     this->showSavedImages();
