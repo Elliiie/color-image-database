@@ -1,4 +1,5 @@
 #include "QtCore/qsize.h"
+#include <map>
 
 struct UIConstants
 {
@@ -7,6 +8,7 @@ struct UIConstants
 
     const QSize COLOR_BUTTON_SIZE = QSize(30, 30);
     const QSize ADD_BUTTON_SIZE = QSize(200, 30);
+    const QSize ALL_IMAGES_BUTTON_SIZE = QSize(40, 40);
 
     const QString ADD_BUTTON_TITLE = "Load new image";
 
@@ -21,9 +23,18 @@ struct UIConstants
     const QString DELETE_BUTTON_TITLE = "Delete";
 };
 
+enum Algorithm
+{
+    HISTOGRAM,
+    KMEANS
+};
+
 struct DBConstants {
     const QString DB_NAME = "colors";
     const char * DB_PASS_ENV_VAR = "POSTGRESQL_PASSWORD";
 
-    const std::vector<QString> ALGORITHMS = {"histogram", "k-means"};
+    const std::map<Algorithm, QString> ALGORITHMS = {
+        { Algorithm::HISTOGRAM, "Histogram" },
+        { Algorithm::KMEANS, "K-means" }
+    };
 };
