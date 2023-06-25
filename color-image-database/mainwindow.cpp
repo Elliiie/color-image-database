@@ -128,9 +128,9 @@ void MainWindow::setupAlgorithmPicker()
     picker = new QComboBox();
     picker->setFixedSize(UIConstants().ADD_BUTTON_SIZE);
     connect(picker, &QComboBox::currentTextChanged, [this]() {
-            this->flowLayout->clearLayout();
-            this->showSavedImages();
-        });
+        this->flowLayout->clearLayout();
+        this->showSavedImages();
+    });
 
     for(const auto &algorithm: DBConstants().ALGORITHMS)
     {
