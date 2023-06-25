@@ -6,9 +6,9 @@
 class DatabaseObject {
 public:
     virtual int getId() const;
-    virtual bool isValid() const;
-    virtual void setValid(bool valid);
+    virtual bool isPersisted() const;
+    virtual void setPersisted(bool valid);
 protected:
     int id;
-    bool valid;
+    bool persisted;
 };

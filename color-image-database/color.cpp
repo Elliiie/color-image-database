@@ -2,14 +2,14 @@
 #include "image.h"
 
 Color::Color() {
-    this->valid = false;
+    this->persisted = false;
 }
 
 Color::Color(int id, QString hex)
 {
     this->id = id;
     this->hex = hex;
-    this->valid = true;
+    this->persisted = true;
 }
 
 QString Color::getHex() const {

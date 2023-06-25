@@ -9,6 +9,7 @@
 #include "flowLayout.h"
 #include <QPushButton>
 #include "QtWidgets/qlabel.h"
+#include "qmessagebox.h"
 #include <QPixmap>
 
 #include <chrono>
@@ -128,6 +129,8 @@ void MainWindow::setupAlgorithmPicker()
     picker = new QComboBox();
     picker->setFixedSize(UIConstants().ADD_BUTTON_SIZE);
     connect(picker, &QComboBox::currentTextChanged, [this]() {
+        unhighlightSelectedIndexIfNeeded();
+        selectedButtonIndex = -1;
         this->flowLayout->clearLayout();
         this->showSavedImages();
     });
@@ -148,9 +151,12 @@ void MainWindow::showSavedImages()
 
 void MainWindow::showImagesWithDominantColor(QString hex)
 {
+    QString chosenAlgorithm = picker->currentText();
     Color color = db.readColor(hex);
     for(Image image: db.readImages(color)) {
-        showImage(image);
+        if (image.getDominantColors().at(chosenAlgorithm).getHex() == color.getHex()) {
+            showImage(image);
+        }
     }
 }
 
@@ -208,7 +214,14 @@ void MainWindow::on_openImageTapped()
         return;
     }
     Image image = this->fileOperationsManager.saveImage(fileName);
-    showImage(image);
+    if (image.isPersisted()) {
+        showImage(image);
+    } else {
+        QMessageBox msgBox;
+        msgBox.setText("Image could not be saved to database. Please try another image.");
+        msgBox.exec();
+    }
+
 }
 
 void MainWindow::on_colorTapped(QString hex)

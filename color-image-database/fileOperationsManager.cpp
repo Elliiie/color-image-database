@@ -17,7 +17,7 @@ FileOperationsManager::FileOperationsManager(DatabaseModule* db)
 
 QString FileOperationsManager::openFile(QWidget *parent) const
 {
-    QString filename= QFileDialog::getOpenFileName(parent, UIConstants().ADD_BUTTON_TITLE, "", "Images (*.png *.jpg, *jpeg)");
+    QString filename= QFileDialog::getOpenFileName(parent, UIConstants().ADD_BUTTON_TITLE, "", "Images (*.png *.jpg *.jpeg)");
 
     if(filename.isEmpty()) { return ""; }
 

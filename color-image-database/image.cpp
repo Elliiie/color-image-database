@@ -3,27 +3,27 @@
 Image::Image()
 {
     this->id = -1;
-    this->valid = false;
+    this->persisted = false;
 }
 
 Image::Image(int id, std::filesystem::path path, std::map<QString, Color> dominantColors) {
     this->id = id;
     this->path = path;
     this->dominantColors = dominantColors;
-    this->valid = true;
+    this->persisted = true;
 }
 
 Image::Image(std::filesystem::path path) {
     this->id = -1;
     this->path = path;
-    this->valid = false;
+    this->persisted = false;
 }
 
 Image::Image(std::filesystem::path path, std::map<QString, Color> dominantColors) {
     this->id = -1;
     this->path = path;
     this->dominantColors = dominantColors;
-    this->valid = false;
+    this->persisted = false;
 }
 
 std::filesystem::path Image::getPath() const {
@@ -36,7 +36,7 @@ const std::map<QString, Color>& Image::getDominantColors() const {
 
 void Image::setId(int id) {
     this->id = id;
-    this->valid = true;
+    this->persisted = true;
 }
 
 void Image::setPath(std::filesystem::path path) {

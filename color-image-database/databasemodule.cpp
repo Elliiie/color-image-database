@@ -125,6 +125,7 @@ void DatabaseModule::createImage(Image& image) {
                 qDebug() << qry.lastError();
         }
         image.setId(imageId);
+        image.setPersisted(true);
     }
 }
 
