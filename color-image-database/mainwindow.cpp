@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
 //    this->db.wipeDatabase();
     this->setupMainLayout();
 
-    this->showSavedImages();
+//    this->showSavedImages();
 
     setWindowTitle(tr("Images database"));
 }
@@ -111,6 +111,10 @@ void MainWindow::setupAlgorithmPicker()
 {
     picker = new QComboBox();
     picker->setFixedSize(UIConstants().ADD_BUTTON_SIZE);
+    connect(picker, &QComboBox::currentTextChanged, [this]() {
+            this->flowLayout->clearLayout();
+            this->showSavedImages();
+        });
 
     for(const auto &algorithm: DBConstants().ALGORITHMS)
     {
