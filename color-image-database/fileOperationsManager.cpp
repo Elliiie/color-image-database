@@ -32,7 +32,7 @@ Image FileOperationsManager::saveImage(QString fullName)
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
-    for(auto const &algorithm: DBConstants().ALGORITHMS)
+    for(const auto &algorithm: DBConstants().ALGORITHMS)
     {
         dominantColors[algorithm.second] = ImageUtil::dominantColorFrom(fullName, colors, algorithm.first);
     }

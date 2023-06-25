@@ -73,7 +73,7 @@ void DatabaseModule::initialSetup() {
     // Insert default algorithms
     bool algorithmsTableIsEmpty = this->readAlgorithms().empty();
     if (algorithmsTableIsEmpty) {
-        for(auto const &algorithm: DBConstants().ALGORITHMS) {
+        for(const auto &algorithm: DBConstants().ALGORITHMS) {
             qry.prepare("INSERT INTO algorithms (name) VALUES (:name)");
             qry.bindValue(":name", algorithm.second);
             if (!qry.exec())
