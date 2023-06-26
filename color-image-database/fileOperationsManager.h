@@ -9,7 +9,7 @@ class FileOperationsManager
 public:
     /*!
      * \brief Constructor - creates file FileOperationsManager object with specified reference to a database module
-     * \param db DatabaseModule reference
+     * \param db DatabaseModule pointer
     */
     FileOperationsManager(DatabaseModule* db);
     /*!

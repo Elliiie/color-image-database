@@ -6,13 +6,6 @@ Image::Image()
     this->persisted = false;
 }
 
-Image::Image(int id, std::filesystem::path path, std::map<QString, Color> dominantColors) {
-    this->id = id;
-    this->path = path;
-    this->dominantColors = dominantColors;
-    this->persisted = true;
-}
-
 Image::Image(std::filesystem::path path) {
     this->id = -1;
     this->path = path;
