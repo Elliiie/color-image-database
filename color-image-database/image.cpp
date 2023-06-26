@@ -29,15 +29,16 @@ const std::map<QString, Color>& Image::getDominantColors() const {
 
 void Image::setId(int id) {
     this->id = id;
-    this->persisted = true;
 }
 
 void Image::setPath(std::filesystem::path path) {
     this->path = path;
+    this->persisted = false;
 }
 
 void Image::addDominantColor(QString algo, Color col) {
     dominantColors[algo] = col;
+    this->persisted = false;
 }
 
 QString Image::dominantColorsToString() const

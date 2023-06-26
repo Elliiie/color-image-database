@@ -140,6 +140,7 @@ std::vector<Image> DatabaseModule::readImages() {
         while (qry.next()) {
             images.push_back(Image(std::filesystem::path(qry.value(1).toString().toStdString())));
             images.at(images.size() - 1).setId(qry.value(0).toInt());
+            images.at(images.size() - 1).setPersisted(true);
         }
     }
 
@@ -180,7 +181,7 @@ std::vector<Image> DatabaseModule::readImages(Color color) {
                 image = Image(std::filesystem::path(qry.value(1).toString().toStdString()));
                 lastId = qry.value(0).toInt();
                 image.setId(lastId);
-
+                image.setPersisted(true);
             }
             // Add dominant color to image
             image.addDominantColor(qry.value(4).toString(), Color(qry.value(2).toInt(), qry.value(3).toString()));

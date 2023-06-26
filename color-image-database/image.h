@@ -39,7 +39,7 @@ public:
     const std::map<QString, Color>& getDominantColors() const;
 
     /*!
-     * \brief Sets id and also sets persisted to true (assumes the id is the same as in the db)
+     * \brief Sets id (assumes the id is the same as in the db)
      * \param int id
      */
     void setId(int id);
