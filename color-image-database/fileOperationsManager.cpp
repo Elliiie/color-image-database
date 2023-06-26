@@ -2,9 +2,8 @@
 #include <QFileDialog>
 #include <iostream>
 #include <ctime>
-#include "constants.cpp"
 #include "imageutil.h"
-
+#include <QApplication>
 
 FileOperationsManager::FileOperationsManager()
 {
@@ -18,7 +17,7 @@ FileOperationsManager::FileOperationsManager(DatabaseModule* db)
 
 QString FileOperationsManager::openFile(QWidget *parent) const
 {
-    QString filename= QFileDialog::getOpenFileName(parent, UIConstants().ADD_BUTTON_TITLE, "", "Images (*.png *.jpg)");
+    QString filename= QFileDialog::getOpenFileName(parent, UIConstants().ADD_BUTTON_TITLE, "", "Images (*.png *.jpg *.jpeg)");
 
     if(filename.isEmpty()) { return ""; }
 
@@ -29,12 +28,20 @@ QString FileOperationsManager::openFile(QWidget *parent) const
 Image FileOperationsManager::saveImage(QString fullName)
 {
     std::vector<Color> colors = db->readColors();
-    Color dominantColor = ImageUtil::dominantColorFrom(fullName, colors, DBConstants().ALGORITHMS[0]);
-    // TODO: Set correct algo
-    std::map<QString, Color> m{{DBConstants().ALGORITHMS[0], dominantColor}};
+    std::map<QString, Color> dominantColors;
 
-    Image image = Image(fullName.toStdString(), m);
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    for(const auto &algorithm: DBConstants().ALGORITHMS)
+    {
+        dominantColors[algorithm.second] = ImageUtil::dominantColorFrom(fullName, colors, algorithm.first);
+    }
+
+    Image image = Image(fullName.toStdString(), dominantColors);
     db->createImage(image);
+
+    QApplication::restoreOverrideCursor();
+
     return image;
 }
 

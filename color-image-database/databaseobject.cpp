@@ -1,13 +1,13 @@
 #include "databaseobject.h"
 
-bool DatabaseObject::isValid() const {
-    return this->valid;
+bool DatabaseObject::isPersisted() const {
+    return this->persisted;
 }
 
 int DatabaseObject::getId() const {
     return this->id;
 }
 
-void DatabaseObject::setValid(bool valid) {
-    this->valid = valid;
+void DatabaseObject::setPersisted(bool valid) {
+    this->persisted = valid;
 }

@@ -67,15 +67,15 @@ void DatabaseModule::initialSetup() {
     createTable(QString("colors"), QString("color_id SERIAL NOT NULL PRIMARY KEY, hex CHAR(7) NOT NULL"));
     createTable(QString("images"), QString("image_id SERIAL NOT NULL PRIMARY KEY, path VARCHAR(100)"));
     createTable(QString("algorithms"), QString("name VARCHAR(100) PRIMARY KEY"));
-    createTable(QString("images_colors"), QString("image_id INTEGER REFERENCES images(image_id), color_id INTEGER REFERENCES colors(color_id), algorithm VARCHAR(100) REFERENCES algorithms(name), CONSTRAINT images_colors_pk PRIMARY KEY (image_id, algorithm)"));
+    createTable(QString("images_colors"), QString("image_id INTEGER REFERENCES images(image_id), color_id INTEGER NOT NULL REFERENCES colors(color_id), algorithm VARCHAR(100) REFERENCES algorithms(name), CONSTRAINT images_colors_pk PRIMARY KEY (image_id, algorithm)"));
 
     QSqlQuery qry(this->db);
     // Insert default algorithms
     bool algorithmsTableIsEmpty = this->readAlgorithms().empty();
     if (algorithmsTableIsEmpty) {
-        for (QString algo : DBConstants().ALGORITHMS) {
+        for(const auto &algorithm: DBConstants().ALGORITHMS) {
             qry.prepare("INSERT INTO algorithms (name) VALUES (:name)");
-            qry.bindValue(":name", algo);
+            qry.bindValue(":name", algorithm.second);
             if (!qry.exec())
                    qDebug() << qry.lastError();
         }
@@ -125,6 +125,7 @@ void DatabaseModule::createImage(Image& image) {
                 qDebug() << qry.lastError();
         }
         image.setId(imageId);
+        image.setPersisted(true);
     }
 }
 

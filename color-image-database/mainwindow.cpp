@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "QtWidgets/qcombobox.h"
 #include "constants.cpp"
 #include <iostream>
 #include <cassert>
@@ -8,6 +9,7 @@
 #include "flowLayout.h"
 #include <QPushButton>
 #include "QtWidgets/qlabel.h"
+#include "qmessagebox.h"
 #include <QPixmap>
 
 #include <chrono>
@@ -22,17 +24,18 @@ MainWindow::MainWindow(QWidget *parent)
     this->buttons = new QHBoxLayout();
 
     this->fileOperationsManager = FileOperationsManager(&db);
-//    this->testDb();
+    this->savedColors = db.readColors();
 
     this->setupMainLayout();
-
-    this->showSavedImages();
 
     setWindowTitle(tr("Images database"));
 }
 
 MainWindow::~MainWindow()
 {
+    flowLayout->clearLayout();
+    delete buttons;
+    delete picker;
     delete ui;
 }
 
@@ -51,6 +54,7 @@ void MainWindow::setupMainLayout()
 
     this->setupColorButtons();
     this->setupLoadImageButton();
+    this->setupAlgorithmPicker();
 
     buttonsWidget->setLayout(buttons);
     ui->verticalLayout->addWidget(buttonsWidget);
@@ -60,15 +64,18 @@ void MainWindow::setupColorButtons()
 {
     QHBoxLayout* colors = new QHBoxLayout();
 
-    std::vector<Color> savedColors = db.readColors();
+    this->colorButtons = std::vector<QPushButton>(savedColors.size());
 
-    for(Color color: savedColors) {
-        QPushButton *button = new QPushButton();
+    for(int i = 0; i < savedColors.size(); i++) {
+        QPushButton *button = &colorButtons.at(i);
+        const Color& color = savedColors.at(i);
         button->setFixedSize(UIConstants().COLOR_BUTTON_SIZE);
-        QString buttonColor = QString("background-color: %1").arg(color.getHex());
-        button->setStyleSheet(buttonColor);
+        unhighlightImageWithIndex(i);
 
-        connect(button,  &QPushButton::clicked, [this, color]() {
+        connect(button,  &QPushButton::clicked, [this, color, i]() {
+            unhighlightSelectedIndexIfNeeded();
+            selectedButtonIndex = i;
+            highlightImageWithIndex(i);
             on_colorTapped(color.getHex());
         });
 
@@ -76,13 +83,37 @@ void MainWindow::setupColorButtons()
     }
 
     QPushButton *button = new QPushButton("ALL");
-    button->setFixedSize(QSize(40, 40));
+    button->setFixedSize(UIConstants().ALL_IMAGES_BUTTON_SIZE);
     connect(button,  &QPushButton::clicked, [this]() {
+        unhighlightSelectedIndexIfNeeded();
+        selectedButtonIndex = -1;
+        flowLayout->clearLayout();
         showSavedImages();
     });
     colors->addWidget(button);
 
     buttons->addItem(colors);
+}
+
+void MainWindow::unhighlightImageWithIndex(int index)
+{
+    QString buttonColor = QString("background-color: %1").arg(savedColors.at(index).getHex());
+    QPushButton *button = &colorButtons.at(index);
+    button->setStyleSheet(buttonColor);
+}
+
+void MainWindow::highlightImageWithIndex(int index)
+{
+    QString buttonColor = QString("background-color: %1; border-style: outset; border-width: 2px; border-color: beige;").arg(savedColors.at(index).getHex());
+    QPushButton *button = &colorButtons.at(index);
+    button->setStyleSheet(buttonColor);
+}
+
+void MainWindow::unhighlightSelectedIndexIfNeeded()
+{
+    if (selectedButtonIndex > -1) {
+        unhighlightImageWithIndex(selectedButtonIndex);
+    }
 }
 
 void MainWindow::setupLoadImageButton()
@@ -91,6 +122,24 @@ void MainWindow::setupLoadImageButton()
     add->setMaximumSize(UIConstants().ADD_BUTTON_SIZE);
     connect(add, SIGNAL(clicked()), this, SLOT(on_openImageTapped()));
     buttons->addWidget(add);
+}
+
+void MainWindow::setupAlgorithmPicker()
+{
+    picker = new QComboBox();
+    picker->setFixedSize(UIConstants().ADD_BUTTON_SIZE);
+    connect(picker, &QComboBox::currentTextChanged, [this]() {
+        unhighlightSelectedIndexIfNeeded();
+        selectedButtonIndex = -1;
+        this->flowLayout->clearLayout();
+        this->showSavedImages();
+    });
+
+    for(const auto &algorithm: DBConstants().ALGORITHMS)
+    {
+        picker->addItem(algorithm.second);
+    }
+    buttons->addWidget(picker);
 }
 
 void MainWindow::showSavedImages()
@@ -102,9 +151,12 @@ void MainWindow::showSavedImages()
 
 void MainWindow::showImagesWithDominantColor(QString hex)
 {
-     Color color = db.readColor(hex);
+    QString chosenAlgorithm = picker->currentText();
+    Color color = db.readColor(hex);
     for(Image image: db.readImages(color)) {
-        showImage(image);
+        if (image.getDominantColors().at(chosenAlgorithm).getHex() == color.getHex()) {
+            showImage(image);
+        }
     }
 }
 
@@ -142,7 +194,8 @@ void MainWindow::showImage(Image image)
 
     // Label representing image's dominant color; Added to the widget holding image's actions and information
     QLabel *imageColorLabel = new QLabel;
-    QString imageDominantColor = QString("background-color: %1").arg(image.getDominantColors().at(DBConstants().ALGORITHMS[0]).getHex());
+    QString chosenAlgorithm = picker->currentText();
+    QString imageDominantColor = QString("background-color: %1").arg(image.getDominantColors().at(chosenAlgorithm).getHex());
     imageColorLabel->setStyleSheet(imageDominantColor);
     buttonActionsAndInfoLayout->addWidget(imageColorLabel);
 
@@ -157,9 +210,18 @@ void MainWindow::showImage(Image image)
 void MainWindow::on_openImageTapped()
 {
     QString fileName = this->fileOperationsManager.openFile(this);
-
+    if (fileName.isEmpty()) {
+        return;
+    }
     Image image = this->fileOperationsManager.saveImage(fileName);
-    showImage(image);
+    if (image.isPersisted()) {
+        showImage(image);
+    } else {
+        QMessageBox msgBox;
+        msgBox.setText("Image could not be saved to database. Please try another image.");
+        msgBox.exec();
+    }
+
 }
 
 void MainWindow::on_colorTapped(QString hex)
@@ -181,10 +243,10 @@ void MainWindow::testDb() {
     Color black = this->db.readColor(colors[0].getHex());
     std::cout << "First color:\n " << black << std::endl;
 
-    std::map<QString, Color> m1 {{DBConstants().ALGORITHMS[0], colors[0]}};
+    std::map<QString, Color> m1 {{ DBConstants().ALGORITHMS.at(Algorithm::HISTOGRAM), colors[0]}};
     std::filesystem::path imagePath1 { "C:\\Users\\ilian\\Desktop\\image1.jpg" };
     Image image1 = Image(imagePath1, m1);
-    m1[DBConstants().ALGORITHMS[1]] = colors[5];
+    m1[DBConstants().ALGORITHMS.at(Algorithm::KMEANS)] = colors[5];
     std::filesystem::path imagePath2 { "C:\\Users\\ilian\\Desktop\\image2.jpg" };
     Image image2 = Image(imagePath2, m1);
     Image image3 = Image(imagePath2, m1);
