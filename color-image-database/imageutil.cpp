@@ -35,9 +35,11 @@ QColor ImageUtil::dominantColorHistogram(const QImage& image)
 void ImageUtil::initializeCentroidsRandomly(const std::vector<QColor>& colors, std::vector<QColor>& centroids, int clustersCount) {
     std::srand(time(nullptr));
 
-    // Keep track of which colors have already been selected for centroids.
+    // A vector to keep track of which colors have already been selected for centroids.
     std::vector<bool> selected(colors.size());
 
+
+    // Select random cluster centroids.
     for (int i = 0; i < clustersCount; ++i) {
         int randomIndex = std::rand() % colors.size();
         while (selected[randomIndex]) {
