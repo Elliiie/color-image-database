@@ -35,9 +35,11 @@ QColor ImageUtil::dominantColorHistogram(const QImage& image)
 void ImageUtil::initializeCentroidsRandomly(const std::vector<QColor>& colors, std::vector<QColor>& centroids, int clustersCount) {
     std::srand(time(nullptr));
 
-    // Keep track of which colors have already been selected for centroids.
+    // A vector to keep track of which colors have already been selected for centroids.
     std::vector<bool> selected(colors.size());
 
+
+    // Select random cluster centroids.
     for (int i = 0; i < clustersCount; ++i) {
         int randomIndex = std::rand() % colors.size();
         while (selected[randomIndex]) {
@@ -75,7 +77,7 @@ void ImageUtil::assignColorsToCentroids(const std::vector<QColor>& colors, const
     }
 }
 
-void ImageUtil::calculateNewCentroids(const std::vector<QColor>& colors, const std::vector<int>& assignments, std::vector<QColor>& centroids) {
+void ImageUtil::calculateNewCentroids(const std::vector<QColor>& colors, std::vector<QColor>& centroids, const std::vector<int>& assignments) {
     std::vector<int> clusterSizes(centroids.size());
     std::vector<int> redSums(centroids.size());
     std::vector<int> greenSums(centroids.size());
@@ -90,6 +92,7 @@ void ImageUtil::calculateNewCentroids(const std::vector<QColor>& colors, const s
         blueSums[clusterIndex] += colors[i].blue();
     }
 
+    // Assign the new centroids to be the average colors of all colors' values inside.
     for (int i = 0; i < centroids.size(); ++i) {
         if (clusterSizes[i] > 0) {
             int redMean = redSums[i] / clusterSizes[i];
@@ -121,9 +124,9 @@ QColor ImageUtil::dominantColorKMeans(const QImage& image) {
     // Keep track of which color is assigned to which centroid.
     std::vector<int> assignments(colors.size());
 
-    // Run the k-means algorithm.
+    // Run the K-means algorithm.
     assignColorsToCentroids(colors, centroids, assignments);
-    calculateNewCentroids(colors, assignments, centroids);
+    calculateNewCentroids(colors, centroids, assignments);
 
     // Find the cluster with the most assigned colors.
     int maxCount = 0;

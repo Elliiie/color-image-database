@@ -70,12 +70,12 @@ void MainWindow::setupColorButtons()
         QPushButton *button = &colorButtons.at(i);
         const Color& color = savedColors.at(i);
         button->setFixedSize(UIConstants().COLOR_BUTTON_SIZE);
-        unhighlightImageWithIndex(i);
+        unhighlightButtonWithIndex(i);
 
         connect(button,  &QPushButton::clicked, [this, color, i]() {
-            unhighlightSelectedIndexIfNeeded();
+            unhighlightSelectedButtonIfNeeded();
             selectedButtonIndex = i;
-            highlightImageWithIndex(i);
+            highlightButtonWithIndex(i);
             on_colorTapped(color.getHex());
         });
 
@@ -85,7 +85,7 @@ void MainWindow::setupColorButtons()
     QPushButton *button = new QPushButton("ALL");
     button->setFixedSize(UIConstants().ALL_IMAGES_BUTTON_SIZE);
     connect(button,  &QPushButton::clicked, [this]() {
-        unhighlightSelectedIndexIfNeeded();
+        unhighlightSelectedButtonIfNeeded();
         selectedButtonIndex = -1;
         flowLayout->clearLayout();
         showSavedImages();
@@ -95,24 +95,24 @@ void MainWindow::setupColorButtons()
     buttons->addItem(colors);
 }
 
-void MainWindow::unhighlightImageWithIndex(int index)
+void MainWindow::unhighlightButtonWithIndex(int index)
 {
     QString buttonColor = QString("background-color: %1").arg(savedColors.at(index).getHex());
     QPushButton *button = &colorButtons.at(index);
     button->setStyleSheet(buttonColor);
 }
 
-void MainWindow::highlightImageWithIndex(int index)
+void MainWindow::highlightButtonWithIndex(int index)
 {
     QString buttonColor = QString("background-color: %1; border-style: outset; border-width: 2px; border-color: beige;").arg(savedColors.at(index).getHex());
     QPushButton *button = &colorButtons.at(index);
     button->setStyleSheet(buttonColor);
 }
 
-void MainWindow::unhighlightSelectedIndexIfNeeded()
+void MainWindow::unhighlightSelectedButtonIfNeeded()
 {
     if (selectedButtonIndex > -1) {
-        unhighlightImageWithIndex(selectedButtonIndex);
+        unhighlightButtonWithIndex(selectedButtonIndex);
     }
 }
 
@@ -129,7 +129,7 @@ void MainWindow::setupAlgorithmPicker()
     picker = new QComboBox();
     picker->setFixedSize(UIConstants().ADD_BUTTON_SIZE);
     connect(picker, &QComboBox::currentTextChanged, [this]() {
-        unhighlightSelectedIndexIfNeeded();
+        unhighlightSelectedButtonIfNeeded();
         selectedButtonIndex = -1;
         this->flowLayout->clearLayout();
         this->showSavedImages();

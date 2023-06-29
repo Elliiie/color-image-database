@@ -6,13 +6,6 @@ Image::Image()
     this->persisted = false;
 }
 
-Image::Image(int id, std::filesystem::path path, std::map<QString, Color> dominantColors) {
-    this->id = id;
-    this->path = path;
-    this->dominantColors = dominantColors;
-    this->persisted = true;
-}
-
 Image::Image(std::filesystem::path path) {
     this->id = -1;
     this->path = path;
@@ -36,15 +29,16 @@ const std::map<QString, Color>& Image::getDominantColors() const {
 
 void Image::setId(int id) {
     this->id = id;
-    this->persisted = true;
 }
 
 void Image::setPath(std::filesystem::path path) {
     this->path = path;
+    this->persisted = false;
 }
 
 void Image::addDominantColor(QString algo, Color col) {
     dominantColors[algo] = col;
+    this->persisted = false;
 }
 
 QString Image::dominantColorsToString() const

@@ -64,6 +64,7 @@ void DatabaseModule::createTable(QString tableName, QString tableStructure) {
 void DatabaseModule::initialSetup() {
     qDebug() << "Setting up database connection...";
 
+    // Create all tables
     createTable(QString("colors"), QString("color_id SERIAL NOT NULL PRIMARY KEY, hex CHAR(7) NOT NULL"));
     createTable(QString("images"), QString("image_id SERIAL NOT NULL PRIMARY KEY, path VARCHAR(100)"));
     createTable(QString("algorithms"), QString("name VARCHAR(100) PRIMARY KEY"));
@@ -129,7 +130,6 @@ void DatabaseModule::createImage(Image& image) {
     }
 }
 
-// TODO!
 std::vector<Image> DatabaseModule::readImages() {
     std::vector<Image> images;
     QSqlQuery qry(this->db);
@@ -140,6 +140,7 @@ std::vector<Image> DatabaseModule::readImages() {
         while (qry.next()) {
             images.push_back(Image(std::filesystem::path(qry.value(1).toString().toStdString())));
             images.at(images.size() - 1).setId(qry.value(0).toInt());
+            images.at(images.size() - 1).setPersisted(true);
         }
     }
 
@@ -151,6 +152,7 @@ std::vector<Image> DatabaseModule::readImages() {
         if (!qryColors.exec()) {
             qDebug() << qry.lastError();
         } else {
+            // Extract dominant colors from images_colors table
             while (qryColors.next()) {
                 image.addDominantColor(qryColors.value(2).toString(), Color(qryColors.value(1).toInt(), qryColors.value(3).toString()));
             }
@@ -179,7 +181,7 @@ std::vector<Image> DatabaseModule::readImages(Color color) {
                 image = Image(std::filesystem::path(qry.value(1).toString().toStdString()));
                 lastId = qry.value(0).toInt();
                 image.setId(lastId);
-
+                image.setPersisted(true);
             }
             // Add dominant color to image
             image.addDominantColor(qry.value(4).toString(), Color(qry.value(2).toInt(), qry.value(3).toString()));
@@ -196,6 +198,7 @@ std::vector<Image> DatabaseModule::readImages(Color color) {
 bool DatabaseModule::deleteImage(int id) {
     QSqlQuery qry(this->db);
 
+    // First delete from images_colors since it references images table's PK
     qry.prepare("DELETE FROM images_colors WHERE image_id = :id");
     qry.bindValue(":id", id);
     if (!qry.exec()) {
